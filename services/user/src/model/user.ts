@@ -1,44 +1,52 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export enum UserRole {
+    USER = "user",
+    ADMIN = "admin",
+}
+
 export interface IUser extends Document {
-    name: string;
+    username: string;
     email: string;
-    image: string;
-    instagram: string;
-    facebook: string;
-    linkedin: string;
+    password: string;
     bio: string;
+    avatar: string;
+    role: UserRole;
+    isVerified: boolean;
 }
 
 const schema: Schema<IUser>  = new Schema({
-    name: {
+    username: {
         type: String,
         required: true,
+        unique: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
     },
-    image: {
+    password: {
         type: String,
         required: true,
-    },
-    instagram: {
-        type: String,
-        default: "",
-    },
-    facebook: {
-        type: String,
-        default: "",
-    },
-    linkedin:{
-        type: String,
-        default: "",
     },
     bio: {
         type: String,
         default: "",
+    },
+    avatar: {
+        type: String,
+        default: "",
+    },
+    role: {
+        type: String,
+        enum: Object.values(UserRole),
+        required: true,
+        default: UserRole.USER,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
     },
 },
 {

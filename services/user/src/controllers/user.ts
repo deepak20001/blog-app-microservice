@@ -1,76 +1,94 @@
 import type { Request, Response } from "express";
-import User from "../model/user.js";
+import User, { UserRole } from "../model/user.js";
 import jwt from "jsonwebtoken";
 import {z} from "zod";
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
 import mongoose from "mongoose";
 import getBuffer from "../utils/data_uri.js";
 import {v2 as cloudinary} from "cloudinary";
+import bcrypt from "bcrypt";
+import Relationship from "../model/relationship.js";
 
 // Validation schemas
 const registerSchema = z.object({
-    name: z.string().
-        min(2, "Name must be at least 2 characters long").
-        max(50, "Name must not exceed 50 characters"),
-    image: z.string(),
-    instagram: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Instagram must be a non-empty string if provided"
-    }),
-    facebook: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Facebook must be a non-empty string if provided"
-    }),
-    linkedin: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Linkedin must be a non-empty string if provided"
-    }),
-    bio: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Bio must be a non-empty string if provided"
-    }),
+    username: z.string().
+        min(2, "Username must be at least 2 characters long").
+        max(50, "Username must not exceed 50 characters"),
+    email: z.email(),
+    password: z.string().
+        min(8, "Password must be atleast 8 characters long").
+        max(10, "Bio must not exceed 10 characters"),
+    bio: z.string().
+        min(5, "Bio must be at least 5 characters long").
+        max(100, "Bio must not exceed 100 characters"),
+    role: z.enum(UserRole)
+});
+
+const logionSchema = z.object({
+    email: z.email(),
+    password: z.string().
+        min(8, "Password must be atleast 8 characters long").
+        max(10, "Bio must not exceed 10 characters"),
 });
 
 const updateUserSchema = z.object({
-    name: z.string().
+    username: z.string().
         min(2, "Name must be at least 2 characters long").
         max(50, "Name must not exceed 50 characters"),
-    image: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Image must be non-empty string if provided"
-    }),
-    instagram: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Instagram must be a non-empty string if provided"
-    }),
-    facebook: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Facebook must be a non-empty string if provided"
-    }),
-    linkedin: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Linkedin must be a non-empty string if provided"
-    }),
-    bio: z.string().optional().refine(val => val === undefined || val === null || val.trim() !== "", {
-        message: "Bio must be a non-empty string if provided"
-    }),
+    bio: z.string().
+        min(5, "Bio must be at least 5 characters long").
+        max(100, "Bio must not exceed 100 characters"),
 });
 
 // Controllers ::::::::::
-export const loginUser = async(req: Request, res: Response) => {
+export const register = async(req: Request, res: Response) => {
     try {
-        // TODO social login functionality
-        const { email, name, image } = req.body;
-        let user = await User.findOne({email});
-        if(!user) {
-            user = await User.create({
-                name, 
-                email, 
-                image,
+        const validationResult = registerSchema.safeParse(req.body);
+        if(!validationResult.success) {
+            const errorMessage = validationResult.error.issues
+                .map((issue) => issue.message) 
+                .join(", ");
+            return res.status(400).json({
+                success: false,
+                error: errorMessage,
             });
-        } 
+        }
 
-        const token = jwt.sign({user}, process.env.JWT_SECRET as string);
+        const {username, email, password, bio, role} = req.body;
+        const userRecord = await User.find({email});
+        if(userRecord != null && userRecord.length > 0) {
+            return res.status(409).json({
+                success: false,
+                error: "User with same email already exists",
+            });
+        }
 
-        res.status(200).json({
+        const hashedPassword = await bcrypt.hash(password, 10);
+        if(!hashedPassword) {
+            return res.status(500).json({
+                success: false,
+                error: "Error while processing password",
+            });
+        }
+
+        const createdUserRecord = await User.create({
+            username,
+            email,
+            password: hashedPassword,
+            bio,
+            role,
+        });
+
+        if(!createdUserRecord) {
+            return res.status(500).json({
+                success: false,
+                error: "Error creating user",
+            });
+        }
+
+        return res.status(201).json({
             success: true,
-            message: "Login successful",
-            data: {
-                token,
-                user,
-            },
+            message: "User created successfully",
         });
     } catch (error: any) {
         console.log(error);
@@ -81,22 +99,54 @@ export const loginUser = async(req: Request, res: Response) => {
     }
 }
 
-export const myProfile = async(req: AuthenticatedRequest, res: Response) => {
+export const login = async(req: Request, res: Response) => {
     try {
-        if(!req.user || !req.user._id) {
+        const validationResult = logionSchema.safeParse(req.body);
+        if(!validationResult.success) {
+            const errorMessage = validationResult.error.issues.
+                map((issue) => issue.message).join(", ");
+            return res.status(400).json({
+                success: false,
+                error: errorMessage,
+            });
+        } 
+
+        const {email, password} = req.body;
+        const userRecord = await User.findOne({email});
+        if(!userRecord) {
+            return res.status(404).json({
+                success: false,
+                error: "User with this email does not exists",
+            });
+        }
+        
+        const isPasswordMatch = await bcrypt.compare(password, userRecord.password);
+        if(!isPasswordMatch) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized user',
+                error: "Invalid credentials",
+            });
+        }
+
+        const token = jwt.sign({ 
+            _id: userRecord._id, 
+            email: userRecord.email 
+        }, process.env.JWT_SECRET as string);
+        if(!token) {
+            return res.status(500).json({
+                success: false,
+                error: "Failed to generate token",
             });
         }
 
         return res.status(200).json({
             success: true,
-            data: req.user,
+            message: "Login successful",
+            data: { token },
         });
     } catch (error: any) {
         console.log(error);
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             error: error.message,
         });
@@ -113,7 +163,7 @@ export const getUserProfile = async(req: Request, res: Response) => {
                 error: "Invalid user ID",
             });
         }
-        const userRecord = await User.findById(id);
+        const userRecord = await User.findById(id).select("-password");
         if(!userRecord) {
             return res.status(404).json({
                 success: false,
@@ -121,9 +171,26 @@ export const getUserProfile = async(req: Request, res: Response) => {
             });
         }
 
+        const followingsRecordCount = await Relationship.find({
+            followingId: id,
+        }).countDocuments();
+        const followersRecordCount = await Relationship.find({
+            followerId: id,
+        }).countDocuments();
+
         return res.status(200).json({
             success: true,
-            data: userRecord,
+            data: {
+                _id: userRecord.id,
+                username: userRecord.username,
+                email: userRecord.email,
+                bio: userRecord.bio,
+                avatar: userRecord.avatar,
+                role: userRecord.role,
+                isVerified: userRecord.isVerified,
+                followersCount: followersRecordCount,
+                followingsRecordCount: followingsRecordCount,
+            },
         });
     } catch (error: any) {
         console.log(error);
@@ -132,130 +199,82 @@ export const getUserProfile = async(req: Request, res: Response) => {
             error: error.message,
         });
     }
+}
+
+export const updateAvatar = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+
+        const {uploadedUrl} = req.body;
+        if(!uploadedUrl) {
+            return res.status(400).json({
+                success: false,
+                error: "Uploaded url not found",
+            });
+        }
+
+        const userRecord = await User.findById(payloadData._id);
+        if(!userRecord) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found",
+            });
+        }
+        await User.updateOne(
+            {_id: payloadData._id},
+            { avatar: uploadedUrl}
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "User avatar uploaded successfully",
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    } 
 }
 
 export const updateUser = async(req: AuthenticatedRequest, res: Response) => {
     try {
-        if(!req.user || !req.user._id) {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized user',
+                error: "Unauthenticated user",
             });
         }
 
-        const userId = req.user._id;
-
+        const userId = payloadData._id;
         const validationResult = updateUserSchema.safeParse(req.body);
         if (!validationResult.success) {
+            const errorMessage = validationResult.error.issues.
+                map((issue) => issue.message).join(", ");
             return res.status(400).json({
                 success: false,
-                message: "Validation failed",
-                errors: validationResult.error.issues.map((err) => ({
-                    field: err.path.join('.'),
-                    message: err.message
-                }))
+                error: errorMessage,
             });
         }
 
-        const { name, image, instagram, facebook, linkedin, bio } = validationResult.data;
+        const { username, bio } = validationResult.data;
         const updatedUserRecord = await User.findByIdAndUpdate(
             userId,
-            {
-                name, image, instagram, facebook, linkedin, bio
-            },
-            {
-                new: true,
-            },
-        );
-
-        const token = jwt.sign({ 
-            user: updatedUserRecord 
-        }, process.env.JWT_SECRET as string);
+            {  username, bio },
+            { new: true },
+        ).select("-password");
 
         return res.status(200).json({
             success: true,
-            data: {
-                user: updatedUserRecord,
-                token,
-            },
-        });
-    } catch (error: any) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            error: error.message,
-        });
-    }
-}
-
-export const updateProfilePic = async(req: AuthenticatedRequest, res: Response) => {
-    try {
-        if(!req.user || !req.user._id) {
-            return res.status(401).json({
-                success: false,
-                error: 'Unauthorized user',
-            });
-        }
-
-        const userId = req.user._id;
-        const file = req.file;
-        if(!file) {
-            return res.status(400).json({
-                success: false,
-                message: "File is missing",
-            });
-        }
-        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        if (!allowedMimeTypes.includes(file.mimetype)) {
-            return res.status(400).json({
-                success: false,
-                message: "Only JPEG, PNG, and WebP images are allowed"
-            });
-        }
-        const maxSize = 3 * 1024 * 1024; // 3MB in bytes
-        if (file.size > maxSize) {
-            return res.status(400).json({
-                success: false,
-                message: "File size must be less than 3MB"
-            });
-        }
-
-        const fileBuffer = getBuffer(file);
-        if(!fileBuffer || !fileBuffer.content) {
-            return res.status(500).json({
-                success: false,
-                message: "Failed to generate file buffer",
-            });
-        }
-
-        const cloudStorage = await cloudinary.uploader.upload(
-            fileBuffer.content, {
-                folder: "blog-app-storage/user-avatars",
-                resource_type: "image",
-            }
-        );
-
-        const updatedUserRecord = await User.findByIdAndUpdate(
-            userId,
-            {
-                image: cloudStorage.secure_url,
-            },
-            { 
-                new: true,
-            },
-        );
-
-        const token = jwt.sign({
-            user: updatedUserRecord
-        }, process.env.JWT_SECRET as string);
-
-        return res.status(200).json({
-            success: true,
-            message: "Profile image updated successfully",
-            data: {
-                user: updatedUserRecord,
-                token,
-            },
+            data: updatedUserRecord,
         });
     } catch (error: any) {
         console.log(error);

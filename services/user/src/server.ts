@@ -2,10 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import userRoutes from "./routes/user.js";
+import relationshipRoutes from "./routes/relationship.js"
 import {v2 as cloudinary} from "cloudinary";
 
 dotenv.config();
-
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUD_NAME as string,
@@ -19,8 +19,8 @@ app.use(express.json());
 app.use("/api/v1/health", (req, res) => {
     res.send("User service running successfully");
 });
-
 app.use("/api/v1", userRoutes);
+app.use("/api/v1", relationshipRoutes);
 
 connectDB();
 

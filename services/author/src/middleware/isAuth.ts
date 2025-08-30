@@ -1,14 +1,19 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
-import type { IUser } from "../model/user.js";
 
-export interface JwtUser {
-    _id: string;
+interface IUser extends Document {
+    _id: string,
+    name: string;
     email: string;
+    image: string;
+    instagram: string;
+    facebook: string;
+    linkedin: string;
+    bio: string;
 }
 
 export interface AuthenticatedRequest extends Request {
-    user?: JwtUser | null,
+    user?: IUser | null,
 }
 
 export const isAuth = async(req: AuthenticatedRequest, res: Response, next: NextFunction) : Promise<void> => {
@@ -30,16 +35,22 @@ export const isAuth = async(req: AuthenticatedRequest, res: Response, next: Next
             return;
         }
 
-        const decodedValue = jwt.verify(token, process.env.JWT_SECRET as string) as JwtUser;
-        if (!decodedValue || !decodedValue._id || !decodedValue.email) {
+        const decodedValue = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+        if(!decodedValue) {
             res.status(401).json({
                 success: false,
-                error: "Invalid token payload",
+                error: "Invalid token",
             });
             return;
         }
-        
-        req.user = decodedValue;
+
+        req.user = decodedValue.user;
+        if(!req.user || !req.user._id) {
+            res.status(401).json({
+                success: false,
+                error: "Unauthorized user",
+            });
+        }
         next();
     } catch (error) {
         console.log("KWT verification error: ", error);
