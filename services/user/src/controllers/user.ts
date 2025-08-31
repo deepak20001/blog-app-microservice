@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import User, { UserRole } from "../model/user.js";
 import jwt from "jsonwebtoken";
-import {z} from "zod";
+import {success, z} from "zod";
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
 import mongoose from "mongoose";
 import getBuffer from "../utils/data_uri.js";
@@ -191,6 +191,32 @@ export const getUserProfile = async(req: Request, res: Response) => {
                 followersCount: followersRecordCount,
                 followingsRecordCount: followingsRecordCount,
             },
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const getUsersProfile = async(req: Request, res: Response) => {
+    try {
+        const {ids} = req.body;
+        if(!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Ids must be a non-empty array",
+            });
+        }
+
+        const result = await User.find({ _id: { $in: ids } }).
+            select("-password");
+
+        return res.status(200).json({
+            success: true,
+            data: result,
         });
     } catch (error: any) {
         console.log(error);

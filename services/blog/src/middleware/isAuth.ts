@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
+import { getTokenFromHeader } from "../utils/get_token.js";
 
 export interface JwtUser {
     _id: string;
@@ -12,23 +13,14 @@ export interface AuthenticatedRequest extends Request {
 
 export const isAuth = async(req: AuthenticatedRequest, res: Response, next: NextFunction) : Promise<void> => {
     try {
-        const authHeader = req.headers.authorization;
-        if(!authHeader || !authHeader.startsWith("Bearer ")) {
+        const token = getTokenFromHeader(req);
+        if (!token) {
             res.status(401).json({
-                success: false,
-                error: "Invalid token",
+            success: false,
+            error: "Invalid token",
             });
             return;
         }
-        const token = authHeader.split(" ")[1];
-        if(!token || token === "") {
-            res.status(401).json({
-                success: false,
-                error: "Invalid token",
-            });
-            return;
-        }
-
         const decodedValue = jwt.verify(token, process.env.JWT_SECRET as string) as JwtUser;
         if (!decodedValue || !decodedValue._id || !decodedValue.email) {
             res.status(401).json({

@@ -14,7 +14,6 @@ cloudinary.config({
 
 
 const app = express();
-
 app.use(express.json());
 
 async function initDB() {
@@ -22,22 +21,38 @@ async function initDB() {
         await sql`
         CREATE TABLE IF NOT EXISTS categories(
         id SERIAL PRIMARY KEY,
-        title VARCHAR(255) NOT NULL
+        title VARCHAR(255) NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
         CREATE TABLE IF NOT EXISTS blogs(
         id SERIAL PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
-        description VARCHAR(255) NOT NULL,
-        blog_content TEXT NOT NULL,
-        image VARCHAR(255) NOT NULL,
-        category VARCHAR(255) NOT NULL,
-        author VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        image_url VARCHAR(255) NOT NULL,
+        category_id VARCHAR(255) NOT NULL,
+        author_id VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
+        CREATE TABLE IF NOT EXISTS savedblogs(
+        id SERIAL PRIMARY KEY,
+        blog_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        `;
+        await sql`
+        CREATE TABLE IF NOT EXISTS upvotes(
+        id SERIAL PRIMARY KEY,
+        blog_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        `;
+        /* await sql`
         CREATE TABLE IF NOT EXISTS comments(
         id SERIAL PRIMARY KEY,
         comment VARCHAR(255) NOT NULL,
@@ -46,15 +61,7 @@ async function initDB() {
         blog_id INT NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-        `;
-        await sql`
-        CREATE TABLE IF NOT EXISTS savedblogs(
-        id SERIAL PRIMARY KEY,
-        user_id VARCHAR(255) NOT NULL,
-        blog_id INT NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        `;
+        `; */
 
         console.log("DATABASE initialised successfully!!!!");
     } catch(error) {
@@ -62,7 +69,7 @@ async function initDB() {
     }
 }
 
-app.use("/api/v1/health", (req, res) => { 
+app.use("/api/health", (req, res) => { 
     res.send("Author service is running successfully");
 });
 app.use("/api/v1", blogRoutes);
