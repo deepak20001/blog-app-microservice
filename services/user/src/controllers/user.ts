@@ -86,9 +86,21 @@ export const register = async(req: Request, res: Response) => {
             });
         }
 
+        const token = jwt.sign({
+            _id: createdUserRecord._id,
+            email: createdUserRecord.email,
+        }, process.env.JWT_SECRET as string);
+        if(!token) {
+            return res.status(500).json({
+                success: false,
+                error: "Failed to generate token",
+            });
+        }
+
         return res.status(201).json({
             success: true,
             message: "User created successfully",
+            data: { token },
         });
     } catch (error: any) {
         console.log(error);

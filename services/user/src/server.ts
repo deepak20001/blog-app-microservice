@@ -4,6 +4,7 @@ import connectDB from "./utils/db.js";
 import userRoutes from "./routes/user.js";
 import relationshipRoutes from "./routes/relationship.js"
 import {v2 as cloudinary} from "cloudinary";
+import cors from "cors";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ cloudinary.config({
 });
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/health", (req, res) => {
