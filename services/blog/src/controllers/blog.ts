@@ -74,6 +74,33 @@ export const createCategory = async(req: AuthenticatedRequest, res: Response) =>
     }
 }
 
+export const getCategories = async(req: AuthenticatedRequest, res: Response ) => {
+    try {
+        const categoriesRecord = await sql`
+            SELECT * FROM categories
+            ORDER BY created_at ASC
+        `;
+        if(!categoriesRecord) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching categories",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Categories fetched successfully",
+            data: categoriesRecord,
+        });
+    } catch (error: any) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
 export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const validationResult = createBlogSchema.safeParse(req.body);
@@ -217,57 +244,123 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
 
 export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
     try {
-        const result = await sql`
-            SELECT * FROM blogs
+        const {category_id: categoryId, search} = req.query;
+        const categoryRecord = await sql`
+            SELECT * FROM categories WHERE id = ${categoryId}
         `;
+
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 30);
+        const offset = (page - 1) * limit;
+
+        let countResult;
+        if(categoryId && categoryRecord && categoryRecord.length > 0) {
+            countResult = await sql`
+                SELECT COUNT(*) as total FROM blogs
+                WHERE category_id = ${categoryId}
+            `;
+        } else {
+            countResult = await sql`
+                SELECT COUNT(*) as total FROM blogs
+            `;
+        }
+        if(!countResult || countResult.length <= 0 || !countResult[0]) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching blogs count",
+            });
+        }
+        const totalItems = parseInt(countResult[0].total);
+        const totalPages = Math.ceil(totalItems/limit);
+
+        let result;
+        if(categoryId && categoryRecord && categoryRecord.length > 0) {
+            result = await sql`
+                SELECT * FROM blogs WHERE category_id = ${categoryId}
+                AND (title ILIKE ${'%' + search + '%'} OR description ILIKE ${'%' + search + '%'})
+                ORDER BY created_at DESC
+                LIMIT ${limit} OFFSET ${offset}
+            `;
+        } else {
+            result = await sql`
+                SELECT * FROM blogs
+                AND (title ILIKE ${'%' + search + '%'} OR description ILIKE ${'%' + search + '%'})
+                ORDER BY created_at DESC
+                LIMIT ${limit} OFFSET ${offset}
+            `;
+        }
+        
 
         if(!result) {
             return res.status(500).json({
                 success: false,
                 error: "Error fetching blogs",
             });
-        }
+        } 
 
-        const authorIds = [...new Set(result.map(blog => blog.author_id))];
-        const token = getTokenFromHeader(req);
-        if (!token) {
-                return res.status(401).json({
-                success: false,
-                error: "Invalid token",
-            });
-        }
-        const authorsResult = await axios.post(
-            `${process.env.USER_SERVICE_URL}/api/v1/users/profiles`,
-            {
-                ids: authorIds,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        if(result.length > 0) {
+            const authorIds = [...new Set(result.map(blog => blog.author_id))];
+            const token = getTokenFromHeader(req);
+            if (!token) {
+                    return res.status(401).json({
+                    success: false,
+                    error: "Invalid token",
+                });
             }
-        );
-        if(!authorsResult) {
-            return res.status(400).json({
-                success: false,
-                error: "Error fetch authors details",
+            const authorsResult = await axios.post(
+                `${process.env.USER_SERVICE_URL}/api/v1/users/profiles`,
+                {
+                    ids: authorIds,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            if(!authorsResult) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Error fetch authors details",
+                });
+            }
+    
+            const authorsMap: Record<string, any> = {};
+            for (const author of authorsResult.data.data) {
+                authorsMap[author._id] = author;
+            }
+    
+            const blogsWithAuthor = result.map(blog => ({
+                ...blog,
+                author: authorsMap[blog.author_id] || null,
+            }));
+
+            return res.status(200).json({
+                success: true,
+                data: blogsWithAuthor,
+                pagination: {
+                    current_page: page,
+                    total_pages: totalPages,
+                    total_items: totalItems,
+                    items_per_page: limit,
+                    has_next: page < totalPages,
+                    has_prev: page > 1,
+                },
+            });
+        } else {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                pagination: {
+                    current_page: page,
+                    total_pages: totalPages,
+                    total_items: totalItems,
+                    items_per_page: limit,
+                    has_next: page < totalPages,
+                    has_prev: page > 1,
+                },
             });
         }
-
-        const authorsMap: Record<string, any> = {};
-        for (const author of authorsResult.data.data) {
-            authorsMap[author._id] = author;
-        }
-
-        const blogsWithAuthor = result.map(blog => ({
-            ...blog,
-            author: authorsMap[blog.author_id] || null,
-        }));
-
-        return res.status(200).json({
-            success: true,
-            data: blogsWithAuthor,
-        });
     } catch (error: any) {
         console.log(error);
         res.status(500).json({
