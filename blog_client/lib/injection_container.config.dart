@@ -13,6 +13,7 @@ import 'package:blog_client/core/services/local_db_service/shared_preferences_st
     as _i190;
 import 'package:blog_client/core/services/network_service/dio_client.dart'
     as _i647;
+import 'package:blog_client/core/utils/debouncer.dart' as _i942;
 import 'package:blog_client/features/auth/repositories/auth_remote_repository.dart'
     as _i509;
 import 'package:blog_client/features/auth/viewmodel/auth_bloc.dart' as _i876;
@@ -40,6 +41,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
     gh.lazySingleton<_i183.ImagePicker>(() => registerModule.imagePicker);
+    gh.lazySingleton<_i942.Debouncer<dynamic>>(() => registerModule.debouncer);
     gh.lazySingleton<_i190.SharedPreferencesStorageRepository>(
       () => _i190.SharedPreferencesStorageRepositoryImpl(
         prefs: gh<_i460.SharedPreferences>(),

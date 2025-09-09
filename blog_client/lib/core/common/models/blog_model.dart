@@ -13,6 +13,9 @@ sealed class BlogModel with _$BlogModel {
     @JsonKey(name: 'category_id') @Default('') String categoryId,
     @JsonKey(name: 'author_id') @Default('') String authorId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
+    @JsonKey(name: 'vote_count') @Default(0) int voteCount,
+    @JsonKey(name: 'is_voted') @Default(false) bool isLiked,
+    @JsonKey(name: 'is_saved') @Default(false) bool isSaved,
     required ProfileModel author,
   }) = _BlogModel;
   const BlogModel._();
@@ -31,6 +34,9 @@ sealed class BlogModel with _$BlogModel {
       categoryId: json['category_id'] ?? '',
       authorId: json['author_id'] ?? '',
       createdAt: json['created_at'] ?? '',
+      voteCount: json['vote_count'] ?? 0,
+      isLiked: json['is_voted'] ?? false,
+      isSaved: json['is_saved'] ?? false,
       author: author,
     );
   }

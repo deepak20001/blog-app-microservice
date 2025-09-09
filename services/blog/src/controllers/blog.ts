@@ -1,9 +1,7 @@
 import type {Request, Response} from "express";
-import getBuffer from "../utils/data_uri.js";
-import cloudinary from "cloudinary";
 import { sql } from "../utils/db.js";
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
-import { z } from "zod";
+import { success, z } from "zod";
 import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
 
@@ -126,7 +124,7 @@ export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
         const {title, description, image, category_id: categoryId} = req.body;
 
         const categoryRecord = await sql`
-        SELECT * FROM categories WHERE id = ${categoryId}
+            SELECT * FROM categories WHERE id = ${categoryId}
         `;
         if(!categoryRecord || categoryRecord.length === 0) {
             return res.status(400).json({
@@ -244,6 +242,14 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
 
 export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
     try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        
         const {category_id: categoryId, search} = req.query;
         const categoryRecord = await sql`
             SELECT * FROM categories WHERE id = ${categoryId}
@@ -276,7 +282,8 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
         let result;
         if(categoryId && categoryRecord && categoryRecord.length > 0) {
             result = await sql`
-                SELECT * FROM blogs WHERE category_id = ${categoryId}
+                SELECT * FROM blogs 
+                WHERE category_id = ${categoryId}
                 AND (title ILIKE ${'%' + search + '%'} OR description ILIKE ${'%' + search + '%'})
                 ORDER BY created_at DESC
                 LIMIT ${limit} OFFSET ${offset}
@@ -284,7 +291,7 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
         } else {
             result = await sql`
                 SELECT * FROM blogs
-                AND (title ILIKE ${'%' + search + '%'} OR description ILIKE ${'%' + search + '%'})
+                WHERE (title ILIKE ${'%' + search + '%'} OR description ILIKE ${'%' + search + '%'})
                 ORDER BY created_at DESC
                 LIMIT ${limit} OFFSET ${offset}
             `;
@@ -297,8 +304,41 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 error: "Error fetching blogs",
             });
         } 
+        
+        // vote-count
+        const blogIds = result.map(blog => blog.id);
+        const voteCounts = await sql`
+            SELECT blog_id, COUNT(*)::int as count
+            FROM upvotes
+            WHERE blog_id = ANY(${blogIds})
+            GROUP BY blog_id
+        `;
+        /*  will receive it like this
+        [
+            { blog_id: 'b1', count: 3 },
+            { blog_id: 'b2', count: 1 }
+        ]
+        */
+        const voteCountMap = Object.fromEntries(voteCounts.map(v => [v.blog_id, v.count]));
+
+        // is-voted
+        const userVotes = await sql`
+            SELECT blog_id
+            FROM upvotes
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+        `;
+        const votedMap = new Set(userVotes.map(v => v.blog_id));
+
+        // is-saved
+        const userSaves = await sql`
+            SELECT blog_id
+            FROM savedblogs
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+        `;
+        const savedMap = new Set(userSaves.map(v => v.blog_id));
 
         if(result.length > 0) {
+            // author-profile data
             const authorIds = [...new Set(result.map(blog => blog.author_id))];
             const token = getTokenFromHeader(req);
             if (!token) {
@@ -330,10 +370,15 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 authorsMap[author._id] = author;
             }
     
-            const blogsWithAuthor = result.map(blog => ({
-                ...blog,
-                author: authorsMap[blog.author_id] || null,
-            }));
+            const blogsWithAuthor = result.map(blog => {
+                return ({
+                    ...blog,
+                    author: authorsMap[blog.author_id] || null,
+                    vote_count: voteCountMap[blog.id] || 0,
+                    is_voted: votedMap.has(String(blog.id)),
+                    is_saved: savedMap.has(String(blog.id)), 
+                })
+            } );
 
             return res.status(200).json({
                 success: true,
@@ -495,3 +540,191 @@ export const deleteBlog = async(req: AuthenticatedRequest, res: Response) => {
         });
     }
 }
+
+export const saveBlog = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        const userId = payloadData._id;
+        const {blog_id: blogId} = req.body;
+        const blogRecord = await sql`
+            SELECT * FROM blogs WHERE id = ${blogId}
+        `;
+
+        if(!blogRecord || blogRecord.length <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid blog id",
+            });
+        }
+
+        const savedBlogRecord = await sql`
+            SELECT * FROM savedblogs 
+            WHERE blog_id = ${blogId} AND user_id = ${userId}
+        `;
+
+        if(savedBlogRecord && savedBlogRecord.length > 0) {
+            return res.status(409).json({
+                success: false,
+                error: "Blog is already saved",
+            });
+        }
+
+        await sql`
+            INSERT INTO savedblogs (blog_id, user_id) 
+            VALUES (${blogId}, ${userId})
+        `;
+        
+        return res.status(201).json({
+            success: true,
+            message: "Blog saved successfully",
+            data: {},
+        });
+    } catch (error: any) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        })
+    }
+}
+
+export const unsaveBlog = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        const userId = payloadData._id;
+        const {blog_id: blogId} = req.body;
+        const savedBlogRecord = await sql`
+            SELECT * FROM savedblogs 
+            WHERE blog_id = ${blogId} AND user_id = ${userId}
+        `;
+
+        if(!savedBlogRecord || savedBlogRecord.length <= 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Saved blog record not found for the user",
+            });
+        }
+
+        await sql`
+            DELETE FROM savedblogs where blog_id = ${blogId} AND user_id = ${userId}
+        `;
+        
+        return res.status(200).json({
+            success: true,
+            message: "Blog unsaved successfully",
+            data: {},
+        });
+    } catch (error: any) {
+        console.log(error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const upvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        const userId = payloadData._id;
+        const {blog_id: blogId} = req.body;
+        const blogRecord = await sql`
+            SELECT * FROM blogs WHERE id = ${blogId}
+        `;
+
+        if(!blogRecord || blogRecord.length <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid blog id",
+            });
+        }
+
+        const upvoteBlogRecord = await sql`
+            SELECT * FROM upvotes 
+            WHERE blog_id = ${blogId} AND user_id = ${userId}
+        `;
+        if(upvoteBlogRecord && upvoteBlogRecord.length > 0) {
+            return res.status(409).json({
+                success: false,
+                error: "Blog is already upvoted",
+            });
+        }
+
+        await sql`
+            INSERT INTO upvotes (blog_id, user_id) 
+            VALUES (${blogId}, ${userId})
+        `;
+
+        return res.status(201).json({
+            success: true,
+            message: "Blog upvoted successfully",
+            data: {},
+        });
+    } catch (error: any) {
+        console.log(error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const unupvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        const userId = payloadData._id;
+        const {blog_id: blogId} = req.body;
+        const upvotedBlogRecord = await sql`
+            SELECT * FROM upvotes 
+            WHERE blog_id = ${blogId} AND user_id = ${userId}
+        `;
+
+        if(!upvotedBlogRecord || upvotedBlogRecord.length <= 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Upvoted blog record not found for the user",
+            });
+        }
+
+        await sql`
+            DELETE FROM upvotes WHERE blog_id = ${blogId} AND user_id = ${userId}
+        `;
+
+        return res.status(200).json({
+            success: true,
+            message: "Blog unupvoted successfully",
+            data: {},
+        });
+    } catch (error: any) {
+        console.log(error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+

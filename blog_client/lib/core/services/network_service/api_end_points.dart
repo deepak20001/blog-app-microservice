@@ -15,11 +15,25 @@ class ApiEndpoints {
   static String get profile => '$userServiceBaseUrl/users/profile';
   static String get logout => '$userServiceBaseUrl/users/logout';
 
-  /// Blog Service Endpoints
-  static String get blogs => '$blogServiceBaseUrl/blogs';
+  // Categories
+  static String get categories => '$blogServiceBaseUrl/blogs/categories';
+
+  // Blog Service Endpoints
+  static String blogsFilter({
+    required int page,
+    required int limit,
+    required int categoryId,
+    required String search,
+  }) =>
+      '$blogServiceBaseUrl/blogs-filter?page=$page&limit=$limit&search=$search' +
+      (categoryId != 0 ? '&category_id=$categoryId' : '');
   static String get createBlog => '$blogServiceBaseUrl/blogs';
   static String get updateBlog => '$blogServiceBaseUrl/blogs';
   static String get deleteBlog => '$blogServiceBaseUrl/blogs';
+  static String get saveBlog => '$blogServiceBaseUrl/blogs/save-blog';
+  static String get unsaveBlog => '$blogServiceBaseUrl/blogs/unsave-blog';
+  static String get upvoteBlog => '$blogServiceBaseUrl/blogs/upvote-blog';
+  static String get unupvoteBlog => '$blogServiceBaseUrl/blogs/unupvote-blog';
 
   /// Media Service Endpoints
   static String get uploadImage => '$mediaServiceBaseUrl/upload';
