@@ -31,7 +31,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     Emitter<BlogsState> emit,
   ) async {
     emit(
-      CategoriesFetchLoadingState(
+      BlogsCategoriesFetchLoadingState(
         categories: state.categories,
         blogs: state.blogs,
       ),
@@ -44,7 +44,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         (failure) {
           devtools.log('Categories fetch failed: ${failure.message}');
           emit(
-            CategoriesFetchFailureState(
+            BlogsCategoriesFetchFailureState(
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
@@ -58,7 +58,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
             CategoryModel(id: 0, title: 'All', isSelected: true),
           );
           emit(
-            CategoriesFetchSuccessState(
+            BlogsCategoriesFetchSuccessState(
               categories: categories,
               blogs: state.blogs,
             ),
@@ -71,7 +71,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         stackTrace: stackTrace,
       );
       emit(
-        CategoriesFetchFailureState(
+        BlogsCategoriesFetchFailureState(
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
@@ -149,7 +149,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     }).toList();
 
     emit(
-      SaveBlogLoadingState(categories: state.categories, blogs: updatedBlogs),
+      BlogsSaveLoadingState(categories: state.categories, blogs: updatedBlogs),
     );
 
     try {
@@ -161,7 +161,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         (failure) {
           devtools.log('Save Blog failed: ${failure.message}');
           emit(
-            SaveBlogFailureState(
+            BlogsSaveFailureState(
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
@@ -170,7 +170,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         },
         (_) async {
           emit(
-            SaveBlogSuccessState(
+            BlogsSaveSuccessState(
               categories: state.categories,
               blogs: state.blogs,
             ),
@@ -183,7 +183,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         stackTrace: stackTrace,
       );
       emit(
-        SaveBlogFailureState(
+        BlogsSaveFailureState(
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
@@ -204,7 +204,10 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       return blog;
     }).toList();
     emit(
-      UnsaveBlogLoadingState(categories: state.categories, blogs: updatedBlogs),
+      BlogsUnsaveLoadingState(
+        categories: state.categories,
+        blogs: updatedBlogs,
+      ),
     );
 
     try {
@@ -216,7 +219,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         (failure) {
           devtools.log('Unsave Blog failed: ${failure.message}');
           emit(
-            UnsaveBlogFailureState(
+            BlogsUnsaveFailureState(
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
@@ -225,7 +228,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         },
         (_) async {
           emit(
-            UnsaveBlogSuccessState(
+            BlogsUnsaveSuccessState(
               categories: state.categories,
               blogs: state.blogs,
             ),
@@ -238,7 +241,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         stackTrace: stackTrace,
       );
       emit(
-        UnsaveBlogFailureState(
+        BlogsUnsaveFailureState(
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
@@ -259,7 +262,10 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       return blog;
     }).toList();
     emit(
-      UpvoteBlogLoadingState(categories: state.categories, blogs: updatedBlogs),
+      BlogsUpvoteLoadingState(
+        categories: state.categories,
+        blogs: updatedBlogs,
+      ),
     );
 
     try {
@@ -271,7 +277,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         (failure) {
           devtools.log('Upvote Blog failed: ${failure.message}');
           emit(
-            UpvoteBlogFailureState(
+            BlogsUpvoteFailureState(
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
@@ -280,7 +286,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         },
         (_) async {
           emit(
-            UpvoteBlogSuccessState(
+            BlogsUpvoteSuccessState(
               categories: state.categories,
               blogs: state.blogs,
             ),
@@ -293,7 +299,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         stackTrace: stackTrace,
       );
       emit(
-        UpvoteBlogFailureState(
+        BlogsUpvoteFailureState(
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
@@ -314,7 +320,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       return blog;
     }).toList();
     emit(
-      UnupvoteBlogLoadingState(
+      BlogsUnupvoteLoadingState(
         categories: state.categories,
         blogs: updatedBlogs,
       ),
@@ -329,7 +335,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         (failure) {
           devtools.log('Unupvote Blog failed: ${failure.message}');
           emit(
-            UnupvoteBlogFailureState(
+            BlogsUnupvoteFailureState(
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
@@ -338,7 +344,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         },
         (_) async {
           emit(
-            UnupvoteBlogSuccessState(
+            BlogsUnupvoteSuccessState(
               categories: state.categories,
               blogs: state.blogs,
             ),
@@ -351,7 +357,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         stackTrace: stackTrace,
       );
       emit(
-        UnupvoteBlogFailureState(
+        BlogsUnupvoteFailureState(
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',

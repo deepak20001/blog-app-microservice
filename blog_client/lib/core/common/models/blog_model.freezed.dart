@@ -219,12 +219,12 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.cate
 
 
 class _BlogModel extends BlogModel {
-  const _BlogModel({required this.id, required this.title, required this.description, @JsonKey(name: 'image_url') this.imageUrl = '', @JsonKey(name: 'category_id') this.categoryId = '', @JsonKey(name: 'author_id') this.authorId = '', @JsonKey(name: 'created_at') this.createdAt = '', @JsonKey(name: 'vote_count') this.voteCount = 0, @JsonKey(name: 'is_voted') this.isLiked = false, @JsonKey(name: 'is_saved') this.isSaved = false, required this.author}): super._();
+  const _BlogModel({this.id = 0, this.title = '', this.description = '', @JsonKey(name: 'image_url') this.imageUrl = '', @JsonKey(name: 'category_id') this.categoryId = '', @JsonKey(name: 'author_id') this.authorId = '', @JsonKey(name: 'created_at') this.createdAt = '', @JsonKey(name: 'vote_count') this.voteCount = 0, @JsonKey(name: 'is_voted') this.isLiked = false, @JsonKey(name: 'is_saved') this.isSaved = false, this.author = const ProfileModel()}): super._();
   
 
-@override final  int id;
-@override final  String title;
-@override final  String description;
+@override@JsonKey() final  int id;
+@override@JsonKey() final  String title;
+@override@JsonKey() final  String description;
 @override@JsonKey(name: 'image_url') final  String imageUrl;
 @override@JsonKey(name: 'category_id') final  String categoryId;
 @override@JsonKey(name: 'author_id') final  String authorId;
@@ -232,7 +232,7 @@ class _BlogModel extends BlogModel {
 @override@JsonKey(name: 'vote_count') final  int voteCount;
 @override@JsonKey(name: 'is_voted') final  bool isLiked;
 @override@JsonKey(name: 'is_saved') final  bool isSaved;
-@override final  ProfileModel author;
+@override@JsonKey() final  ProfileModel author;
 
 /// Create a copy of BlogModel
 /// with the given fields replaced by the non-null parameter values.

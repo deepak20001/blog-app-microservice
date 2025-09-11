@@ -27,6 +27,8 @@ class ApiEndpoints {
   }) =>
       '$blogServiceBaseUrl/blogs-filter?page=$page&limit=$limit&search=$search' +
       (categoryId != 0 ? '&category_id=$categoryId' : '');
+  static String blogDetails({required String id}) =>
+      '$blogServiceBaseUrl/blogs/$id';
   static String get createBlog => '$blogServiceBaseUrl/blogs';
   static String get updateBlog => '$blogServiceBaseUrl/blogs';
   static String get deleteBlog => '$blogServiceBaseUrl/blogs';

@@ -17,22 +17,22 @@ class BlogsInitialState extends BlogsState {
 }
 
 // Categories Fetch States
-class CategoriesFetchLoadingState extends BlogsState {
-  const CategoriesFetchLoadingState({
+class BlogsCategoriesFetchLoadingState extends BlogsState {
+  const BlogsCategoriesFetchLoadingState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class CategoriesFetchSuccessState extends BlogsState {
-  const CategoriesFetchSuccessState({
+class BlogsCategoriesFetchSuccessState extends BlogsState {
+  const BlogsCategoriesFetchSuccessState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class CategoriesFetchFailureState extends BlogsState {
-  const CategoriesFetchFailureState({
+class BlogsCategoriesFetchFailureState extends BlogsState {
+  const BlogsCategoriesFetchFailureState({
     required super.categories,
     required super.blogs,
     required this.errorMessage,
@@ -74,16 +74,22 @@ class BlogsFetchFailureState extends BlogsState {
 }
 
 // Save Blog States
-class SaveBlogLoadingState extends BlogsState {
-  const SaveBlogLoadingState({required super.categories, required super.blogs});
+class BlogsSaveLoadingState extends BlogsState {
+  const BlogsSaveLoadingState({
+    required super.categories,
+    required super.blogs,
+  });
 }
 
-class SaveBlogSuccessState extends BlogsState {
-  const SaveBlogSuccessState({required super.categories, required super.blogs});
+class BlogsSaveSuccessState extends BlogsState {
+  const BlogsSaveSuccessState({
+    required super.categories,
+    required super.blogs,
+  });
 }
 
-class SaveBlogFailureState extends BlogsState {
-  const SaveBlogFailureState({
+class BlogsSaveFailureState extends BlogsState {
+  const BlogsSaveFailureState({
     required super.categories,
     required super.blogs,
     required this.errorMessage,
@@ -95,22 +101,22 @@ class SaveBlogFailureState extends BlogsState {
 }
 
 // Unsave Blog States
-class UnsaveBlogLoadingState extends BlogsState {
-  const UnsaveBlogLoadingState({
+class BlogsUnsaveLoadingState extends BlogsState {
+  const BlogsUnsaveLoadingState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UnsaveBlogSuccessState extends BlogsState {
-  const UnsaveBlogSuccessState({
+class BlogsUnsaveSuccessState extends BlogsState {
+  const BlogsUnsaveSuccessState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UnsaveBlogFailureState extends BlogsState {
-  const UnsaveBlogFailureState({
+class BlogsUnsaveFailureState extends BlogsState {
+  const BlogsUnsaveFailureState({
     required super.categories,
     required super.blogs,
     required this.errorMessage,
@@ -122,22 +128,22 @@ class UnsaveBlogFailureState extends BlogsState {
 }
 
 // Upvote Blog States
-class UpvoteBlogLoadingState extends BlogsState {
-  const UpvoteBlogLoadingState({
+class BlogsUpvoteLoadingState extends BlogsState {
+  const BlogsUpvoteLoadingState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UpvoteBlogSuccessState extends BlogsState {
-  const UpvoteBlogSuccessState({
+class BlogsUpvoteSuccessState extends BlogsState {
+  const BlogsUpvoteSuccessState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UpvoteBlogFailureState extends BlogsState {
-  const UpvoteBlogFailureState({
+class BlogsUpvoteFailureState extends BlogsState {
+  const BlogsUpvoteFailureState({
     required super.categories,
     required super.blogs,
     required this.errorMessage,
@@ -149,22 +155,22 @@ class UpvoteBlogFailureState extends BlogsState {
 }
 
 // Unupvote Blog States
-class UnupvoteBlogLoadingState extends BlogsState {
-  const UnupvoteBlogLoadingState({
+class BlogsUnupvoteLoadingState extends BlogsState {
+  const BlogsUnupvoteLoadingState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UnupvoteBlogSuccessState extends BlogsState {
-  const UnupvoteBlogSuccessState({
+class BlogsUnupvoteSuccessState extends BlogsState {
+  const BlogsUnupvoteSuccessState({
     required super.categories,
     required super.blogs,
   });
 }
 
-class UnupvoteBlogFailureState extends BlogsState {
-  const UnupvoteBlogFailureState({
+class BlogsUnupvoteFailureState extends BlogsState {
+  const BlogsUnupvoteFailureState({
     required super.categories,
     required super.blogs,
     required this.errorMessage,

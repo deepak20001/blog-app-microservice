@@ -139,8 +139,8 @@ class BuildBlogCard extends StatelessWidget {
                           BlocBuilder<BlogsBloc, BlogsState>(
                             bloc: blogsBloc,
                             buildWhen: (previous, current) =>
-                                current is SaveBlogLoadingState ||
-                                current is UnsaveBlogLoadingState,
+                                current is BlogsSaveLoadingState ||
+                                current is BlogsUnsaveLoadingState,
                             builder: (context, state) {
                               final currentBlog = state.blogs.firstWhere(
                                 (b) => b.id == blog.id,
@@ -173,8 +173,8 @@ class BuildBlogCard extends StatelessWidget {
                             child: BlocBuilder<BlogsBloc, BlogsState>(
                               bloc: blogsBloc,
                               buildWhen: (previous, current) =>
-                                  current is UpvoteBlogLoadingState ||
-                                  current is UnupvoteBlogLoadingState,
+                                  current is BlogsUpvoteLoadingState ||
+                                  current is BlogsUnupvoteLoadingState,
                               builder: (context, state) {
                                 final currentBlog = state.blogs.firstWhere(
                                   (b) => b.id == blog.id,
@@ -205,13 +205,12 @@ class BuildBlogCard extends StatelessWidget {
                                         width: 1,
                                       ),
                                     ),
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: size.width * numD04,
-                                        vertical: size.width * numD025,
-                                      ),
+                                    child: context.paddingSymmetric(
+                                      horizontal: numD04,
+                                      vertical: numD025,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
+                                        spacing: size.width * numD02,
                                         children: [
                                           Icon(
                                             currentBlog.isLiked
@@ -222,7 +221,6 @@ class BuildBlogCard extends StatelessWidget {
                                                 : AppPallete.greyColor400,
                                             size: size.width * numD05,
                                           ),
-                                          SizedBox(width: size.width * numD02),
                                           CommonText(
                                             text: currentBlog.voteCount
                                                 .toString(),

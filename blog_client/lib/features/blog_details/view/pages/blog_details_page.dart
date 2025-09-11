@@ -4,14 +4,16 @@ import 'package:blog_client/core/common/extensions/padding_extensions.dart';
 import 'package:blog_client/core/common/extensions/size_extensions.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/models/blog_model.dart';
-import 'package:blog_client/core/common/models/profile_model.dart';
 import 'package:blog_client/core/common/widgets/common_cached_image.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
+import 'package:blog_client/core/common/widgets/loader.dart';
 import 'package:blog_client/core/constants/constants.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
-import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
+import 'package:blog_client/features/blog_details/view/widgets/build_sliver_blog_details_appbar.dart';
+import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
 import 'package:blog_client/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 @RoutePage()
 class BlogDetailsPage extends StatefulWidget {
@@ -23,381 +25,353 @@ class BlogDetailsPage extends StatefulWidget {
 }
 
 class _BlogDetailsPageState extends State<BlogDetailsPage> {
-  final BlogsBloc _blogsBloc = getIt<BlogsBloc>();
-  BlogModel? _blog;
-  String _commentSortBy = 'latest';
+  final BlogDetailsBloc _blogDetailsBloc = getIt<BlogDetailsBloc>();
 
   @override
   void initState() {
     super.initState();
-    // Find the blog from the current state
-    _blog = _blogsBloc.state.blogs.firstWhere(
-      (blog) => blog.id == widget.blogId,
-      orElse: () => BlogModel(
-        id: widget.blogId,
-        title: 'Loading...',
-        description: 'Loading...',
-        author: ProfileModel.empty(),
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _blogDetailsBloc.add(BlogDetailsFetchEvent(id: widget.blogId.toString()));
+    });
+  }
+
+  void _onUpvoteBlog(BuildContext context) {
+    _blogDetailsBloc.add(UpvoteBlogEvent(blogId: widget.blogId));
+  }
+
+  void _onUnupvoteBlog(BuildContext context) {
+    _blogDetailsBloc.add(UnupvoteBlogEvent(blogId: widget.blogId));
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return Scaffold(
-      backgroundColor: AppPallete.backgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar with Hero Image
-          SliverAppBar(
-            backgroundColor: AppPallete.backgroundColor,
-            elevation: 0,
-            pinned: true,
-            expandedHeight: size.height * numD4,
-            leading: IconButton(
-              onPressed: () => context.router.maybePop(),
-              icon: const Icon(
-                Icons.arrow_back_ios,
-                color: AppPallete.textPrimary,
-              ),
+    return BlocConsumer<BlogDetailsBloc, BlogDetailsState>(
+      bloc: _blogDetailsBloc,
+      buildWhen: (previous, current) =>
+          current is BlogDetailsFetchLoadingState ||
+          current is BlogDetailsFetchSuccessState ||
+          current is BlogDetailsFetchFailureState,
+      listener: (context, state) {},
+      builder: (context, state) {
+        final BlogModel blog = state.blog;
+
+        return Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {},
+            backgroundColor: AppPallete.primaryColor,
+            foregroundColor: AppPallete.whiteColor,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(size.width * numD04),
             ),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.bookmark_border,
-                  color: AppPallete.greyColor400,
-                ),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  color: AppPallete.greyColor300,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
-                  child: CommonCachedImage(
-                    imageUrl: _blog?.imageUrl ?? '',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+            icon: Icon(Icons.auto_awesome, size: size.width * numD05),
+            label: CommonText(
+              text: 'AI Summarize',
+              fontSize: size.width * numD035,
+              fontWeight: FontWeight.w600,
+              color: AppPallete.whiteColor,
             ),
           ),
-
-          // Content
-          SliverToBoxAdapter(
-            child: context.paddingAll(
-              numD035,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  CommonText(
-                    text: _blog?.title ?? 'Blog Title',
-                    style: context.headlineMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppPallete.textPrimary,
-                      height: 1.3,
+          body: (state is BlogDetailsFetchLoadingState)
+              ? Loader(color: AppPallete.primaryColor)
+              : CustomScrollView(
+                  slivers: [
+                    BuildSliverBlogDetailsAppbar(
+                      blog: blog,
+                      size: size,
+                      blogDetailsBloc: _blogDetailsBloc,
                     ),
-                  ),
 
-                  context.sizedBoxHeight(numD025),
-
-                  // Author and Date Row
-                  Row(
-                    children: [
-                      Container(
-                        width: size.width * numD1,
-                        height: size.width * numD1,
-                        decoration: BoxDecoration(
-                          color: AppPallete.primaryColor.withValues(
-                            alpha: numD1,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: ClipOval(
-                          child: CommonCachedImage(
-                            imageUrl: _blog?.author.avatar ?? '',
-                          ),
-                        ),
-                      ),
-                      context.sizedBoxWidth(numD02),
-                      Expanded(
+                    // Content
+                    SliverToBoxAdapter(
+                      child: context.paddingAll(
+                        numD035,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Title
                             CommonText(
-                              text: _blog?.author.username ?? 'Author Name',
-                              style: context.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
+                              text: blog.title,
+                              style: context.headlineMedium.copyWith(
+                                fontWeight: FontWeight.w700,
                                 color: AppPallete.textPrimary,
                               ),
                             ),
-                            CommonText(
-                              text:
-                                  _blog?.createdAt.toTimeAgo() ?? '2 days ago',
-                              style: context.bodySmall.copyWith(
-                                color: AppPallete.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Action Buttons
-                      Row(
-                        children: [
-                          // Upvote Button
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppPallete.cardBackground,
-                              borderRadius: BorderRadius.circular(
-                                size.width * numD08,
-                              ),
-                              border: Border.all(
-                                color: AppPallete.greyColor300,
-                                width: 1,
-                              ),
-                            ),
-                            child: Material(
-                              color: AppPallete.transparentColor,
-                              child: InkWell(
-                                onTap: () {},
-                                borderRadius: BorderRadius.circular(
-                                  size.width * numD08,
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: size.width * numD04,
-                                    vertical: size.width * numD025,
+                            context.sizedBoxHeight(numD025),
+                            Row(
+                              children: [
+                                Container(
+                                  width: size.width * numD1,
+                                  height: size.width * numD1,
+                                  decoration: BoxDecoration(
+                                    color: AppPallete.primaryColor.withValues(
+                                      alpha: numD1,
+                                    ),
+                                    shape: BoxShape.circle,
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                  child: ClipOval(
+                                    child: CommonCachedImage(
+                                      imageUrl: blog.author.avatar,
+                                    ),
+                                  ),
+                                ),
+                                context.sizedBoxWidth(numD02),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(
-                                        Icons.thumb_up_outlined,
-                                        color: AppPallete.greyColor400,
-                                        size: size.width * numD05,
-                                      ),
-                                      SizedBox(width: size.width * numD02),
                                       CommonText(
-                                        text:
-                                            _blog?.voteCount.toString() ?? '0',
-                                        style: context.bodySmall.copyWith(
-                                          color: AppPallete.textSecondary,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        text: blog.author.username,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppPallete.textPrimary,
+                                      ),
+                                      CommonText(
+                                        text: blog.createdAt.toTimeAgo(),
+                                        color: AppPallete.textSecondary,
                                       ),
                                     ],
                                   ),
                                 ),
+                                Material(
+                                  color: AppPallete.transparentColor,
+                                  borderRadius: BorderRadius.circular(
+                                    size.width * numD08,
+                                  ),
+                                  child: BlocBuilder<BlogDetailsBloc, BlogDetailsState>(
+                                    bloc: _blogDetailsBloc,
+                                    buildWhen: (previous, current) =>
+                                        current
+                                            is BlogDetailsUpvoteBlogLoadingState ||
+                                        current
+                                            is BlogDetailsUnupvoteBlogLoadingState,
+                                    builder: (context, state) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          state.blog.isLiked
+                                              ? _onUnupvoteBlog(context)
+                                              : _onUpvoteBlog(context);
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: state.blog.isLiked
+                                                ? AppPallete.primaryColor
+                                                      .withValues(alpha: numD1)
+                                                : AppPallete.cardBackground,
+                                            borderRadius: BorderRadius.circular(
+                                              size.width * numD08,
+                                            ),
+                                            border: Border.all(
+                                              color: state.blog.isLiked
+                                                  ? AppPallete.primaryColor
+                                                        .withValues(
+                                                          alpha: numD3,
+                                                        )
+                                                  : AppPallete.greyColor300,
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: context.paddingSymmetric(
+                                            horizontal: numD04,
+                                            vertical: numD025,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              spacing: size.width * numD02,
+                                              children: [
+                                                Icon(
+                                                  state.blog.isLiked
+                                                      ? Icons.thumb_up
+                                                      : Icons.thumb_up_outlined,
+                                                  color: state.blog.isLiked
+                                                      ? AppPallete.primaryColor
+                                                      : AppPallete.greyColor400,
+                                                  size: size.width * numD05,
+                                                ),
+                                                CommonText(
+                                                  text: state.blog.voteCount
+                                                      .toString(),
+                                                  style: context.bodySmall
+                                                      .copyWith(
+                                                        color:
+                                                            state.blog.isLiked
+                                                            ? AppPallete
+                                                                  .primaryColor
+                                                            : AppPallete
+                                                                  .textSecondary,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            context.sizedBoxHeight(numD035),
+                            Container(
+                              width: double.infinity,
+                              padding: context.paddingAll(numD035).padding,
+                              decoration: BoxDecoration(
+                                color: AppPallete.cardBackground,
+                                borderRadius: BorderRadius.circular(
+                                  size.width * numD03,
+                                ),
+                                border: Border.all(
+                                  color: AppPallete.greyColor300,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CommonText(
+                                    text: 'Description',
+                                    style: context.titleSmall.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppPallete.textPrimary,
+                                    ),
+                                  ),
+                                  context.sizedBoxHeight(numD015),
+                                  CommonText(
+                                    text: blog.description,
+                                    color: AppPallete.textSecondary,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  context.sizedBoxHeight(numD04),
-
-                  // Divider
-                  Container(height: 1, color: AppPallete.greyColor300),
-
-                  context.sizedBoxHeight(numD04),
-
-                  // Description Section
-                  CommonText(
-                    text: 'Description',
-                    style: context.titleMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppPallete.textPrimary,
-                    ),
-                  ),
-
-                  context.sizedBoxHeight(numD02),
-
-                  CommonText(
-                    text:
-                        _blog?.description ??
-                        'This is a sample blog description that provides detailed information about the topic being discussed. It contains valuable insights and information that readers can benefit from.',
-                    style: context.bodyLarge.copyWith(
-                      color: AppPallete.textPrimary,
-                      height: 1.6,
-                    ),
-                  ),
-
-                  context.sizedBoxHeight(numD08),
-
-                  // Additional Content Card
-                  Container(
-                    width: double.infinity,
-                    padding: context.paddingAll(numD035).padding,
-                    decoration: BoxDecoration(
-                      color: AppPallete.cardBackground,
-                      borderRadius: BorderRadius.circular(size.width * numD03),
-                      border: Border.all(
-                        color: AppPallete.greyColor300,
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CommonText(
-                          text: 'About this blog',
-                          style: context.titleSmall.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppPallete.textPrimary,
-                          ),
-                        ),
-                        context.sizedBoxHeight(numD015),
-                        CommonText(
-                          text:
-                              'This blog post was created to share insights and knowledge with the community. Feel free to engage with the content by liking, saving, or sharing your thoughts. This blog post was created to share insights and knowledge with the community. Feel free to engage with the content by liking, saving, or sharing your thoughts. This blog post was created to share insights and knowledge with the community. Feel free to engage with the content by liking, saving, or sharing your thoughts. This blog post was created to share insights and knowledge with the community. Feel free to engage with the content by liking, saving, or sharing your thoughts.',
-                          style: context.bodyMedium.copyWith(
-                            color: AppPallete.textSecondary,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  context.sizedBoxHeight(numD08),
-
-                  // Comments Section
-                  CommonText(
-                    text: 'Comments (${_getCommentsCount()})',
-                    style: context.titleMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppPallete.textPrimary,
-                    ),
-                  ),
-
-                  context.sizedBoxHeight(numD03),
-
-                  // Comment Input
-                  Container(
-                    padding: context.paddingAll(numD025).padding,
-                    decoration: BoxDecoration(
-                      color: AppPallete.cardBackground,
-                      borderRadius: BorderRadius.circular(size.width * numD08),
-                      border: Border.all(
-                        color: AppPallete.greyColor300,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: size.width * numD08,
-                          height: size.width * numD08,
-                          decoration: BoxDecoration(
-                            color: AppPallete.primaryColor.withValues(
-                              alpha: numD1,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: ClipOval(
-                            child: CommonCachedImage(
-                              imageUrl: 'https://via.placeholder.com/40',
-                            ),
-                          ),
-                        ),
-                        context.sizedBoxWidth(numD02),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: size.width * numD03,
-                              vertical: size.width * numD02,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppPallete.backgroundColor,
-                              borderRadius: BorderRadius.circular(
-                                size.width * numD08,
-                              ),
-                              border: Border.all(
-                                color: AppPallete.greyColor300,
-                                width: 1,
+                            context.sizedBoxHeight(numD08),
+                            CommonText(
+                              text: 'Comments (12)',
+                              style: context.titleMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppPallete.textPrimary,
                               ),
                             ),
-                            child: CommonText(
-                              text: 'Write a comment...',
-                              style: context.bodyMedium.copyWith(
-                                color: AppPallete.textSecondary,
+
+                            context.sizedBoxHeight(numD03),
+
+                            // Comment Input
+                            Container(
+                              padding: context.paddingAll(numD025).padding,
+                              decoration: BoxDecoration(
+                                color: AppPallete.cardBackground,
+                                borderRadius: BorderRadius.circular(
+                                  size.width * numD08,
+                                ),
+                                border: Border.all(
+                                  color: AppPallete.greyColor300,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: size.width * numD08,
+                                    height: size.width * numD08,
+                                    decoration: BoxDecoration(
+                                      color: AppPallete.primaryColor.withValues(
+                                        alpha: numD1,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: ClipOval(
+                                      child: CommonCachedImage(
+                                        imageUrl:
+                                            'https://via.placeholder.com/40',
+                                      ),
+                                    ),
+                                  ),
+                                  context.sizedBoxWidth(numD02),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: size.width * numD03,
+                                        vertical: size.width * numD02,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppPallete.backgroundColor,
+                                        borderRadius: BorderRadius.circular(
+                                          size.width * numD08,
+                                        ),
+                                        border: Border.all(
+                                          color: AppPallete.greyColor300,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: CommonText(
+                                        text: 'Write a comment...',
+                                        style: context.bodyMedium.copyWith(
+                                          color: AppPallete.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  context.sizedBoxWidth(numD02),
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.send,
+                                      color: AppPallete.primaryColor,
+                                      size: size.width * numD06,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+
+                            context.sizedBoxHeight(numD04),
+
+                            // Comment Filters
+                            /* Row(
+                              children: [
+                                CommonText(
+                                  text: 'Sort by:',
+                                  style: context.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: AppPallete.textPrimary,
+                                  ),
+                                ),
+                                context.sizedBoxWidth(numD02),
+                                _buildFilterChip(
+                                  context,
+                                  size,
+                                  'Latest',
+                                  'latest',
+                                  Icons.access_time,
+                                ),
+                                context.sizedBoxWidth(numD015),
+                                _buildFilterChip(
+                                  context,
+                                  size,
+                                  'Most Upvoted',
+                                  'most_upvoted',
+                                  Icons.thumb_up,
+                                ),
+                              ],
+                            ), */
+                            context.sizedBoxHeight(numD03),
+
+                            // Comments List
+                            // ..._buildCommentsList(context, size),
+                          ],
                         ),
-                        context.sizedBoxWidth(numD02),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.send,
-                            color: AppPallete.primaryColor,
-                            size: size.width * numD06,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-
-                  context.sizedBoxHeight(numD04),
-
-                  // Comment Filters
-                  Row(
-                    children: [
-                      CommonText(
-                        text: 'Sort by:',
-                        style: context.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: AppPallete.textPrimary,
-                        ),
-                      ),
-                      context.sizedBoxWidth(numD02),
-                      _buildFilterChip(
-                        context,
-                        size,
-                        'Latest',
-                        'latest',
-                        Icons.access_time,
-                      ),
-                      context.sizedBoxWidth(numD015),
-                      _buildFilterChip(
-                        context,
-                        size,
-                        'Most Upvoted',
-                        'most_upvoted',
-                        Icons.thumb_up,
-                      ),
-                    ],
-                  ),
-
-                  context.sizedBoxHeight(numD03),
-
-                  // Comments List
-                  ..._buildCommentsList(context, size),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+                  ],
+                ),
+        );
+      },
     );
   }
 
+  /* 
   int _getCommentsCount() {
     return 12; // Mock data
   }
@@ -655,5 +629,5 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
         ),
       );
     }).toList();
-  }
+  } */
 }

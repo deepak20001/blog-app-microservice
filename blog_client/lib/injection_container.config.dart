@@ -17,6 +17,10 @@ import 'package:blog_client/core/utils/debouncer.dart' as _i942;
 import 'package:blog_client/features/auth/repositories/auth_remote_repository.dart'
     as _i509;
 import 'package:blog_client/features/auth/viewmodel/auth_bloc.dart' as _i876;
+import 'package:blog_client/features/blog_details/repositories/blog_details_remote_repository.dart'
+    as _i789;
+import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart'
+    as _i411;
 import 'package:blog_client/features/blogs/repositories/blogs_remote_repository.dart'
     as _i658;
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart' as _i942;
@@ -53,8 +57,18 @@ extension GetItInjectableX on _i174.GetIt {
         storageRepository: gh<_i190.SharedPreferencesStorageRepository>(),
       ),
     );
+    gh.lazySingleton<_i789.BlogDetailsRemoteRepository>(
+      () => _i789.BlogDetialsRemoteRepositoryImpl(
+        dioClient: gh<_i647.DioClient>(),
+      ),
+    );
     gh.lazySingleton<_i509.AuthRemoteRepository>(
       () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
+    );
+    gh.singleton<_i411.BlogDetailsBloc>(
+      () => _i411.BlogDetailsBloc(
+        blogDetailsRemoteRepository: gh<_i789.BlogDetailsRemoteRepository>(),
+      ),
     );
     gh.lazySingleton<_i658.BlogsRemoteRepository>(
       () => _i658.BlogsRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),

@@ -6,9 +6,9 @@ part 'blog_model.freezed.dart';
 @freezed
 sealed class BlogModel with _$BlogModel {
   const factory BlogModel({
-    required int id,
-    required String title,
-    required String description,
+    @Default(0) int id,
+    @Default('') String title,
+    @Default('') String description,
     @JsonKey(name: 'image_url') @Default('') String imageUrl,
     @JsonKey(name: 'category_id') @Default('') String categoryId,
     @JsonKey(name: 'author_id') @Default('') String authorId,
@@ -16,7 +16,7 @@ sealed class BlogModel with _$BlogModel {
     @JsonKey(name: 'vote_count') @Default(0) int voteCount,
     @JsonKey(name: 'is_voted') @Default(false) bool isLiked,
     @JsonKey(name: 'is_saved') @Default(false) bool isSaved,
-    required ProfileModel author,
+    @Default(ProfileModel()) ProfileModel author,
   }) = _BlogModel;
   const BlogModel._();
 
@@ -40,4 +40,6 @@ sealed class BlogModel with _$BlogModel {
       author: author,
     );
   }
+
+  factory BlogModel.empty() => const BlogModel();
 }
