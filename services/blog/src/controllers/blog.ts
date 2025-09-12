@@ -47,7 +47,7 @@ export const createCategory = async(req: AuthenticatedRequest, res: Response) =>
 
         const {title} = req.body;
         const categoryRecord = await sql`
-        INSERT INTO categories (title) VALUES (${title}) RETURNING *
+            INSERT INTO categories (title) VALUES (${title}) RETURNING *
         `;
         if(!categoryRecord || categoryRecord.length === 0) {
             return res.status(500).json({
@@ -191,10 +191,10 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
         const {id} = req.params;
         const blogId = Number(id);
         if (!id || isNaN(blogId) || blogId <= 0) {
-        return res.status(400).json({
-            success: false,
-            error: "Invalid blog ID",
-        });
+            return res.status(400).json({
+                success: false,
+                error: "Invalid blog ID",
+            });
         }
         
         // vote-count

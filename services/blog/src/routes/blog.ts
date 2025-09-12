@@ -16,16 +16,24 @@ import {
 
 const router = express();
 
-router.post("/blogs/category", isAuth, createCategory);
-router.get("/blogs/categories", isAuth, getCategories);
-router.post("/blogs/save-blog", isAuth, saveBlog);
-router.delete("/blogs/unsave-blog", isAuth, unsaveBlog);
-router.post("/blogs/upvote-blog", isAuth, upvoteBlog);
-router.delete("/blogs/unupvote-blog", isAuth, unupvoteBlog);
-router.post("/blogs", isAuth, createBlog);
-router.get("/blogs/:id", isAuth, getBlogById);
-router.get("/blogs-filter", isAuth, getBlogs);
-router.patch("/blogs/:id", isAuth, updateBlog);
-router.delete("/blogs/:id", isAuth, deleteBlog);
+// Categories
+router.post("/category", isAuth, createCategory);
+router.get("/categories", isAuth, getCategories);
+
+// Save/Unsave blog
+router.post("/save-blog", isAuth, saveBlog);
+router.delete("/unsave-blog", isAuth, unsaveBlog);
+
+// Upvote/Unupvote blog
+router.post("/upvote-blog", isAuth, upvoteBlog);
+router.delete("/unupvote-blog", isAuth, unupvoteBlog);
+
+// Blog CRUD
+router.post("/", isAuth, createBlog);
+router.get("/filter", isAuth, getBlogs);
+router.get("/:id", isAuth, getBlogById);
+router.patch("/:id", isAuth, updateBlog);
+router.delete("/:id", isAuth, deleteBlog);
+
 
 export default router;
