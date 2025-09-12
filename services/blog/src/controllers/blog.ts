@@ -181,14 +181,47 @@ export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
 
 export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
     try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        } 
         const {id} = req.params;
-
         const blogId = Number(id);
         if (!id || isNaN(blogId) || blogId <= 0) {
         return res.status(400).json({
             success: false,
             error: "Invalid blog ID",
         });
+        }
+        
+        // vote-count
+        const voteCount = await sql`
+            SELECT COUNT(*)::int
+            FROM upvotes
+            WHERE blog_id = ${blogId}
+        `;
+
+        // is-voted
+        const isVotedRecord = await sql`
+            SELECT * FROM upvotes
+            WHERE blog_id = ${blogId} AND user_id = ${payloadData._id}
+        `;
+        let isVoted = false;
+        if(isVotedRecord && isVotedRecord.length != 0) {
+            isVoted = true;
+        }
+
+        // is-saved
+        const isSavedRecord = await sql`
+            SELECT * FROM savedblogs 
+            WHERE blog_id = ${blogId} AND user_id = ${payloadData._id}
+        `;
+        let isSaved = false;
+        if(isSavedRecord && isSavedRecord.length != 0) {
+            isSaved = true;
         }
 
         const result = await sql`
@@ -229,6 +262,9 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
             data: {
                 ...blog,
                 author: authorRecord.data["data"],
+                vote_count: voteCount?.[0]?.count ?? 0,
+                is_voted: isVoted,
+                is_saved: isSaved,
             },
         });
     } catch (error: any) {
