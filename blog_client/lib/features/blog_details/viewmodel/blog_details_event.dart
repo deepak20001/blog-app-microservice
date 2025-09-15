@@ -17,8 +17,8 @@ class BlogDetailsFetchEvent extends BlogDetailsEvent {
 }
 
 // Save Blog Event
-class SaveBlogEvent extends BlogDetailsEvent {
-  const SaveBlogEvent({required this.blogId});
+class BlogDetailsSaveBlogEvent extends BlogDetailsEvent {
+  const BlogDetailsSaveBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -26,8 +26,8 @@ class SaveBlogEvent extends BlogDetailsEvent {
 }
 
 // Unsave Blog Event
-class UnsaveBlogEvent extends BlogDetailsEvent {
-  const UnsaveBlogEvent({required this.blogId});
+class BlogDetailsUnsaveBlogEvent extends BlogDetailsEvent {
+  const BlogDetailsUnsaveBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -35,8 +35,8 @@ class UnsaveBlogEvent extends BlogDetailsEvent {
 }
 
 // Upvote Blog Event
-class UpvoteBlogEvent extends BlogDetailsEvent {
-  const UpvoteBlogEvent({required this.blogId});
+class BlogDetailsUpvoteBlogEvent extends BlogDetailsEvent {
+  const BlogDetailsUpvoteBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -44,10 +44,71 @@ class UpvoteBlogEvent extends BlogDetailsEvent {
 }
 
 // Unupvote Blog Event
-class UnupvoteBlogEvent extends BlogDetailsEvent {
-  const UnupvoteBlogEvent({required this.blogId});
+class BlogDetailsUnupvoteBlogEvent extends BlogDetailsEvent {
+  const BlogDetailsUnupvoteBlogEvent({required this.blogId});
   final int blogId;
 
   @override
   List<Object?> get props => [blogId];
+}
+
+// Get Comments Event
+class BlogDetailsGetCommentsEvent extends BlogDetailsEvent {
+  const BlogDetailsGetCommentsEvent({required this.blogId});
+  final int blogId;
+
+  @override
+  List<Object?> get props => [blogId];
+}
+
+// Create Comment Event
+class BlogDetailsCreateCommentEvent extends BlogDetailsEvent {
+  const BlogDetailsCreateCommentEvent({
+    required this.blogId,
+    required this.comment,
+  });
+  final int blogId;
+  final String comment;
+
+  @override
+  List<Object?> get props => [blogId, comment];
+}
+
+// Delete Comment Event
+class BloDetailsDeleteCommentEvent extends BlogDetailsEvent {
+  const BloDetailsDeleteCommentEvent({
+    required this.commentId,
+    required this.blogId,
+  });
+  final int commentId;
+  final int blogId;
+
+  @override
+  List<Object?> get props => [commentId, blogId];
+}
+
+// Upvote Comment Event
+class BlogDetailsUpvoteCommentEvent extends BlogDetailsEvent {
+  const BlogDetailsUpvoteCommentEvent({
+    required this.commentId,
+    required this.blogId,
+  });
+  final int commentId;
+  final int blogId;
+
+  @override
+  List<Object?> get props => [commentId, blogId];
+}
+
+// Unupvote Comment Event
+class BlogDetailsUnupvoteCommentEvent extends BlogDetailsEvent {
+  const BlogDetailsUnupvoteCommentEvent({
+    required this.commentId,
+    required this.blogId,
+  });
+  final int commentId;
+  final int blogId;
+
+  @override
+  List<Object?> get props => [commentId, blogId];
 }

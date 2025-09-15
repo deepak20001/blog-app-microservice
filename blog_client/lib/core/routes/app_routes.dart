@@ -16,5 +16,6 @@ class AppRouter extends RootStackRouter {
     // blogs
     AutoRoute(path: AppRoutesName.blogs, page: BlogsRoute.page),
     AutoRoute(path: AppRoutesName.blogDetails, page: BlogDetailsRoute.page),
+    AutoRoute(path: AppRoutesName.createBlog, page: CreateBlogRoute.page),
   ];
 }

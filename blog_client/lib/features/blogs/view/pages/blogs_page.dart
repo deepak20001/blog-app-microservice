@@ -114,6 +114,12 @@ class _BlogsPageState extends State<BlogsPage> {
             ),
             centerTitle: true,
           ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: AppPallete.primaryColor,
+            foregroundColor: AppPallete.whiteColor,
+            onPressed: () => context.router.push(const CreateBlogRoute()),
+            child: const Icon(Icons.add),
+          ),
           body: context.paddingHorizontal(
             numD035,
             child: Column(

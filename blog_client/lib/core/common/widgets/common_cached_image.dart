@@ -46,7 +46,6 @@ class CommonCachedImage extends StatelessWidget {
             child: Icon(
               Icons.image_not_supported,
               color: AppPallete.greyColor400,
-              size: size.width * numD12,
             ),
           ),
         );

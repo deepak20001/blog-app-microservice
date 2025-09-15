@@ -1,5 +1,9 @@
 import 'dart:developer' as devtools show log;
+import 'package:blog_client/core/common/enums/api_state_enums.dart';
 import 'package:blog_client/core/common/models/blog_model.dart';
+import 'package:blog_client/core/common/models/profile_model.dart';
+import 'package:blog_client/core/services/local_db_service/shared_preferences_storage_repository.dart';
+import 'package:blog_client/features/blog_details/models/comment_model.dart';
 import 'package:blog_client/features/blog_details/repositories/blog_details_remote_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,22 +16,37 @@ part 'blogs_details_state.dart';
 class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
   BlogDetailsBloc({
     required BlogDetailsRemoteRepository blogDetailsRemoteRepository,
+    required SharedPreferencesStorageRepository storageRepository,
   }) : _blogDetailsRemoteRepository = blogDetailsRemoteRepository,
+       _storageRepository = storageRepository,
        super(const BlogDetailsInitialState()) {
     on<BlogDetailsFetchEvent>(_onBlogDetailsFetchRequested);
-    on<SaveBlogEvent>(_onSaveBlogRequested);
-    on<UnsaveBlogEvent>(_onUnsaveBlogRequested);
-    on<UpvoteBlogEvent>(_onUpvoteBlogRequested);
-    on<UnupvoteBlogEvent>(_onUnupvoteBlogRequested);
+    on<BlogDetailsSaveBlogEvent>(_onSaveBlogRequested);
+    on<BlogDetailsUnsaveBlogEvent>(_onUnsaveBlogRequested);
+    on<BlogDetailsUpvoteBlogEvent>(_onUpvoteBlogRequested);
+    on<BlogDetailsUnupvoteBlogEvent>(_onUnupvoteBlogRequested);
+    on<BlogDetailsGetCommentsEvent>(_onGetCommentsRequested);
+    on<BlogDetailsCreateCommentEvent>(_onCreateCommentRequested);
+    on<BlogDetailsUpvoteCommentEvent>(_onUpvoteCommentRequested);
+    on<BlogDetailsUnupvoteCommentEvent>(_onUnupvoteCommentRequested);
   }
   final BlogDetailsRemoteRepository _blogDetailsRemoteRepository;
+  final SharedPreferencesStorageRepository _storageRepository;
+
+  // getters
+  String get userProfileImage => _storageRepository.userProfileImage;
 
   // Handle blog details fetch
   Future<void> _onBlogDetailsFetchRequested(
     BlogDetailsFetchEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
-    emit(BlogDetailsFetchLoadingState());
+    emit(
+      BlogDetailsFetchLoadingState(
+        commentsApiState: state.commentsApiState,
+        comments: state.comments,
+      ),
+    );
 
     try {
       final result = await _blogDetailsRemoteRepository.blogDetails(
@@ -37,10 +56,22 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
       await result.fold(
         (failure) {
           devtools.log('Blog details fetch failed: ${failure.message}');
-          emit(BlogDetailsFetchFailureState(errorMessage: failure.message));
+          emit(
+            BlogDetailsFetchFailureState(
+              errorMessage: failure.message,
+              commentsApiState: state.commentsApiState,
+              comments: state.comments,
+            ),
+          );
         },
         (BlogModel blog) async {
-          emit(BlogDetailsFetchSuccessState(blog: blog));
+          emit(
+            BlogDetailsFetchSuccessState(
+              blog: blog,
+              commentsApiState: state.commentsApiState,
+              comments: state.comments,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -51,6 +82,8 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
       emit(
         BlogDetailsFetchFailureState(
           errorMessage: 'An unexpected error occurred. Please try again.',
+          commentsApiState: state.commentsApiState,
+          comments: state.comments,
         ),
       );
     }
@@ -58,11 +91,16 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
 
   /// Handle save blog
   Future<void> _onSaveBlogRequested(
-    SaveBlogEvent event,
+    BlogDetailsSaveBlogEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
     final updatedBlog = state.blog.copyWith(isSaved: true);
-    emit(BlogDetailsSaveBlogLoadingState(blog: updatedBlog));
+    emit(
+      BlogDetailsSaveBlogLoadingState(
+        blog: updatedBlog,
+        comments: state.comments,
+      ),
+    );
 
     try {
       final result = await _blogDetailsRemoteRepository.saveBlog(
@@ -76,11 +114,17 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
             BlogDetailsSaveBlogFailureState(
               errorMessage: failure.message,
               blog: updatedBlog,
+              comments: state.comments,
             ),
           );
         },
         (_) async {
-          emit(BlogDetailsSaveBlogSuccessState(blog: updatedBlog));
+          emit(
+            BlogDetailsSaveBlogSuccessState(
+              blog: updatedBlog,
+              comments: state.comments,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -92,6 +136,7 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
         BlogDetailsSaveBlogFailureState(
           blog: updatedBlog,
           errorMessage: 'An unexpected error occurred. Please try again.',
+          comments: state.comments,
         ),
       );
     }
@@ -99,11 +144,16 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
 
   /// Handle unsave blog
   Future<void> _onUnsaveBlogRequested(
-    UnsaveBlogEvent event,
+    BlogDetailsUnsaveBlogEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
     final updatedBlog = state.blog.copyWith(isSaved: false);
-    emit(BlogDetailsUnsaveBlogLoadingState(blog: updatedBlog));
+    emit(
+      BlogDetailsUnsaveBlogLoadingState(
+        blog: updatedBlog,
+        comments: state.comments,
+      ),
+    );
 
     try {
       final result = await _blogDetailsRemoteRepository.unsaveBlog(
@@ -117,11 +167,17 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
             BlogDetailsUnsaveBlogFailureState(
               errorMessage: failure.message,
               blog: updatedBlog,
+              comments: state.comments,
             ),
           );
         },
         (_) async {
-          emit(BlogDetailsUnsaveBlogSuccessState(blog: updatedBlog));
+          emit(
+            BlogDetailsUnsaveBlogSuccessState(
+              blog: updatedBlog,
+              comments: state.comments,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -133,6 +189,7 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
         BlogDetailsUnsaveBlogFailureState(
           blog: updatedBlog,
           errorMessage: 'An unexpected error occurred. Please try again.',
+          comments: state.comments,
         ),
       );
     }
@@ -140,14 +197,19 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
 
   /// Handle upvote blog
   Future<void> _onUpvoteBlogRequested(
-    UpvoteBlogEvent event,
+    BlogDetailsUpvoteBlogEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
     final updatedBlog = state.blog.copyWith(
       isLiked: true,
       voteCount: state.blog.voteCount + 1,
     );
-    emit(BlogDetailsUpvoteBlogLoadingState(blog: updatedBlog));
+    emit(
+      BlogDetailsUpvoteBlogLoadingState(
+        blog: updatedBlog,
+        comments: state.comments,
+      ),
+    );
 
     try {
       final result = await _blogDetailsRemoteRepository.upvoteBlog(
@@ -161,11 +223,17 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
             BlogDetailsUpvoteBlogFailureState(
               errorMessage: failure.message,
               blog: updatedBlog,
+              comments: state.comments,
             ),
           );
         },
         (_) async {
-          emit(BlogDetailsUpvoteBlogSuccessState(blog: updatedBlog));
+          emit(
+            BlogDetailsUpvoteBlogSuccessState(
+              blog: updatedBlog,
+              comments: state.comments,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -177,6 +245,7 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
         BlogDetailsUpvoteBlogFailureState(
           blog: updatedBlog,
           errorMessage: 'An unexpected error occurred. Please try again.',
+          comments: state.comments,
         ),
       );
     }
@@ -184,14 +253,19 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
 
   /// Handle unupvote blog
   Future<void> _onUnupvoteBlogRequested(
-    UnupvoteBlogEvent event,
+    BlogDetailsUnupvoteBlogEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
     final updatedBlog = state.blog.copyWith(
       isLiked: false,
       voteCount: state.blog.voteCount - 1,
     );
-    emit(BlogDetailsUnupvoteBlogLoadingState(blog: updatedBlog));
+    emit(
+      BlogDetailsUnupvoteBlogLoadingState(
+        blog: updatedBlog,
+        comments: state.comments,
+      ),
+    );
 
     try {
       final result = await _blogDetailsRemoteRepository.unupvoteBlog(
@@ -205,11 +279,17 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
             BlogDetailsUnupvoteBlogFailureState(
               errorMessage: failure.message,
               blog: updatedBlog,
+              comments: state.comments,
             ),
           );
         },
         (_) async {
-          emit(BlogDetailsUnupvoteBlogSuccessState(blog: updatedBlog));
+          emit(
+            BlogDetailsUnupvoteBlogSuccessState(
+              blog: updatedBlog,
+              comments: state.comments,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -220,6 +300,273 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
       emit(
         BlogDetailsUnupvoteBlogFailureState(
           blog: updatedBlog,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+          comments: state.comments,
+        ),
+      );
+    }
+  }
+
+  /// Handle get comments
+  Future<void> _onGetCommentsRequested(
+    BlogDetailsGetCommentsEvent event,
+    Emitter<BlogDetailsState> emit,
+  ) async {
+    if (state.commentsApiState == ApiStateEnums.loading) {
+      return;
+    }
+    emit(
+      BlogDetailsGetCommentsLoadingState(
+        blog: state.blog,
+        blogDetailsApiState: state.blogDetailsApiState,
+      ),
+    );
+
+    try {
+      final result = await _blogDetailsRemoteRepository.getComments(
+        blogId: event.blogId,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Unupvote Blog failed: ${failure.message}');
+          emit(
+            BlogDetailsGetCommentsFailureState(
+              errorMessage: failure.message,
+              blogDetailsApiState: state.blogDetailsApiState,
+              blog: state.blog,
+            ),
+          );
+        },
+        (List<CommentModel> comments) async {
+          emit(
+            BlogDetailsGetCommentsSuccessState(
+              blog: state.blog,
+              blogDetailsApiState: state.blogDetailsApiState,
+              comments: comments,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during get comments: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        BlogDetailsGetCommentsFailureState(
+          blog: state.blog,
+          blogDetailsApiState: state.blogDetailsApiState,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+        ),
+      );
+    }
+  }
+
+  /// Handle create comment
+  Future<void> _onCreateCommentRequested(
+    BlogDetailsCreateCommentEvent event,
+    Emitter<BlogDetailsState> emit,
+  ) async {
+    if (state is BlogDetailsCreateCommentLoadingState) {
+      return;
+    }
+
+    final commentId = DateTime.now().millisecondsSinceEpoch;
+    final updatedComments = [
+      CommentModel(
+        id: commentId,
+        comment: event.comment,
+        userId: _storageRepository.userId,
+        blogId: event.blogId,
+        createdAt: DateTime.now().toIso8601String(),
+        voteCount: 0,
+        isVoted: false,
+        author: ProfileModel(
+          id: _storageRepository.userId,
+          username: _storageRepository.userName,
+          avatar: _storageRepository.userProfileImage,
+          createdAt: DateTime.now().toIso8601String(),
+          updatedAt: DateTime.now().toIso8601String(),
+        ),
+      ),
+      ...state.comments,
+    ];
+    emit(
+      BlogDetailsCreateCommentLoadingState(
+        blog: state.blog,
+        comments: updatedComments,
+        successMessage: 'Comment created successfully',
+      ),
+    );
+
+    try {
+      final result = await _blogDetailsRemoteRepository.createComment(
+        blogId: event.blogId,
+        comment: event.comment,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Create Comment failed: ${failure.message}');
+          emit(
+            BlogDetailsCreateCommentFailureState(
+              errorMessage: failure.message,
+              comments: state.comments,
+              blog: state.blog,
+            ),
+          );
+        },
+        (int commentId) async {
+          final updatedComments = state.comments.last.copyWith(id: commentId);
+          emit(
+            BlogDetailsCreateCommentSuccessState(
+              blog: state.blog,
+              comments: [
+                ...state.comments.take(state.comments.length - 1),
+                updatedComments,
+              ],
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during create comment: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        BlogDetailsCreateCommentFailureState(
+          blog: state.blog,
+          comments: state.comments,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+        ),
+      );
+    }
+  }
+
+  /// Handle upvote comment
+  Future<void> _onUpvoteCommentRequested(
+    BlogDetailsUpvoteCommentEvent event,
+    Emitter<BlogDetailsState> emit,
+  ) async {
+    if (state is BlogDetailsUpvoteCommentLoadingState) {
+      return;
+    }
+
+    final updatedComments = state.comments.map((comment) {
+      if (comment.id == event.commentId) {
+        return comment.copyWith(
+          isVoted: true,
+          voteCount: comment.voteCount + 1,
+        );
+      }
+      return comment;
+    }).toList();
+    emit(
+      BlogDetailsUpvoteCommentLoadingState(
+        blog: state.blog,
+        comments: updatedComments,
+      ),
+    );
+
+    try {
+      final result = await _blogDetailsRemoteRepository.upvoteComment(
+        blogId: event.blogId,
+        commentId: event.commentId,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Upvote Comment failed: ${failure.message}');
+          emit(
+            BlogDetailsUpvoteCommentFailureState(
+              errorMessage: failure.message,
+              comments: state.comments,
+              blog: state.blog,
+            ),
+          );
+        },
+        (_) async {
+          emit(
+            BlogDetailsUpvoteCommentSuccessState(
+              blog: state.blog,
+              comments: state.comments,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during upvote comment: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        BlogDetailsUpvoteCommentFailureState(
+          blog: state.blog,
+          comments: state.comments,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+        ),
+      );
+    }
+  }
+
+  /// Handle unupvote comment
+  Future<void> _onUnupvoteCommentRequested(
+    BlogDetailsUnupvoteCommentEvent event,
+    Emitter<BlogDetailsState> emit,
+  ) async {
+    final updatedComments = state.comments.map((comment) {
+      if (comment.id == event.commentId) {
+        return comment.copyWith(
+          isVoted: false,
+          voteCount: comment.voteCount - 1,
+        );
+      }
+      return comment;
+    }).toList();
+    emit(
+      BlogDetailsUnupvoteCommentLoadingState(
+        blog: state.blog,
+        comments: updatedComments,
+      ),
+    );
+
+    try {
+      final result = await _blogDetailsRemoteRepository.unupvoteComment(
+        blogId: event.blogId,
+        commentId: event.commentId,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Unupvote Comment failed: ${failure.message}');
+          emit(
+            BlogDetailsUnupvoteCommentFailureState(
+              errorMessage: failure.message,
+              comments: state.comments,
+              blog: state.blog,
+            ),
+          );
+        },
+        (_) async {
+          emit(
+            BlogDetailsUnupvoteCommentSuccessState(
+              blog: state.blog,
+              comments: state.comments,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during unupvote comment: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        BlogDetailsUnupvoteCommentFailureState(
+          blog: state.blog,
+          comments: state.comments,
           errorMessage: 'An unexpected error occurred. Please try again.',
         ),
       );

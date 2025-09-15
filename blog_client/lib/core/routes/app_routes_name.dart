@@ -6,4 +6,5 @@ class AppRoutesName {
   // blogs
   static const String blogs = '/blogs';
   static const String blogDetails = '/blog-details';
+  static const String createBlog = '/create-blog';
 }

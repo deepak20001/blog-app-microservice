@@ -41,8 +41,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthLoginFailureState(errorMessage: failure.message));
         },
         (data) async {
-          final (successMessage, token) = data;
+          final (successMessage, token, user) = data;
           _storageRepository.accessToken = token;
+          _storageRepository.userId = user.id;
+          _storageRepository.userName = user.username;
+          _storageRepository.userEmail = user.email;
+          _storageRepository.userProfileImage = user.avatar;
           emit(AuthLoginSuccessState(successMessage: successMessage));
         },
       );

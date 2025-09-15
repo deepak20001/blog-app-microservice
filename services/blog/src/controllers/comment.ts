@@ -83,9 +83,30 @@ export const getComments = async(req: AuthenticatedRequest, res: Response) => {
             });
         }
 
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+
+
+        const countResult = await sql`
+            SELECT COUNT(*) FROM comments
+            WHERE blog_id = ${blogId}
+        `;
+        if(!countResult || countResult.length <= 0 || !countResult[0]) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching comments",
+            });
+        }
+        console.log(countResult)
+        const totalItems = parseInt(countResult[0].count);
+        const totalPages = Math.ceil(totalItems/limit);
+
         const result = await sql`
             SELECT * FROM comments 
             WHERE blog_id = ${id}
+            ORDER BY created_at DESC
+            LIMIT ${limit} OFFSET ${offset}
         `;
         if(!result) {
             return res.status(500).json({
@@ -99,7 +120,7 @@ export const getComments = async(req: AuthenticatedRequest, res: Response) => {
         const voteCountQueryResult = await sql`
             SELECT comment_id, COUNT(*)::int as count
             FROM commentupvotes
-            WHERE user_id = ${payloadData._id} AND blog_id = ${blogId} AND status = 'like' AND comment_id = ANY(${commentIds})
+            WHERE blog_id = ${blogId} AND status = 'like' AND comment_id = ANY(${commentIds})
             GROUP BY comment_id
         `;
         /* 
@@ -161,12 +182,28 @@ export const getComments = async(req: AuthenticatedRequest, res: Response) => {
                     success: true,
                     message: "Comments fetched successfully",
                     data: commentsWithMoreFields,
+                    pagination: {
+                        current_page: page,
+                        total_pages: totalPages,
+                        total_items: totalItems,
+                        items_per_page: limit,
+                        has_next: page < totalPages,
+                        has_prev: page > 1,
+                    },
                 });
             } else {
                 return res.status(200).json({
                     success: true,
                     message: "Comments fetched successfully",
                     data: [],
+                    pagination: {
+                        current_page: page,
+                        total_pages: totalPages,
+                        total_items: totalItems,
+                        items_per_page: limit,
+                        has_next: page < totalPages,
+                        has_prev: page > 1,
+                    },
                 });
             }
     } catch (error: any) {

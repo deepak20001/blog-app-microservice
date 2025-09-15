@@ -20,7 +20,7 @@ const createBlogSchema = z.object({
         min(3, "Name must be at least 3 characters long").
         max(1000, "Name must not exceed 200 characters"),
     image: z.string(),
-    category_id: z.string(),
+    category_id: z.number(),
 });
 
 // Controllers ::::::::::
@@ -292,7 +292,7 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
         `;
 
         const page = parseInt(req.query.page as string) || 1;
-        const limit = Math.min(parseInt(req.query.limit as string) || 10, 30);
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
         const offset = (page - 1) * limit;
 
         let countResult;

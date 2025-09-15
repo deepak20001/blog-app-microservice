@@ -4,6 +4,7 @@ import 'package:blog_client/core/error/failures.dart';
 import 'package:blog_client/core/services/network_service/api_end_points.dart';
 import 'package:blog_client/core/services/network_service/dio_client.dart';
 import 'package:blog_client/core/services/network_service/network_exceptions.dart';
+import 'package:blog_client/features/blog_details/models/comment_model.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 
@@ -22,6 +23,35 @@ abstract interface class BlogDetailsRemoteRepository {
 
   // Unlike Blog
   Future<Either<Failure, String>> unupvoteBlog({required int blogId});
+
+  // Get Comments
+  Future<Either<Failure, List<CommentModel>>> getComments({
+    required int blogId,
+  });
+
+  // Create Comment
+  Future<Either<Failure, int>> createComment({
+    required int blogId,
+    required String comment,
+  });
+
+  // Delete Comment
+  Future<Either<Failure, String>> deleteComment({
+    required int commentId,
+    required int blogId,
+  });
+
+  // Upvote Comment
+  Future<Either<Failure, String>> upvoteComment({
+    required int commentId,
+    required int blogId,
+  });
+
+  // Unupvote Comment
+  Future<Either<Failure, String>> unupvoteComment({
+    required int commentId,
+    required int blogId,
+  });
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -163,6 +193,154 @@ class BlogDetialsRemoteRepositoryImpl implements BlogDetailsRemoteRepository {
           return Failure(error.message);
         }
         return Failure('Unupvote Blog failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, List<CommentModel>>> getComments({
+    required int blogId,
+  }) async {
+    return TaskEither<Failure, List<CommentModel>>.tryCatch(
+      () async {
+        final response = await _dioClient.get<Map<String, dynamic>>(
+          ApiEndpoints.fetchComments(blogId: blogId),
+        );
+
+        final data = response.data!;
+        final comments = data['data'] as List<dynamic>;
+        final commentModels = (comments)
+            .map((comment) => CommentModel.fromJson(comment))
+            .toList();
+        return commentModels;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Get Comments error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Get Comments failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, int>> createComment({
+    required int blogId,
+    required String comment,
+  }) async {
+    return TaskEither<Failure, int>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.createComment,
+          data: {'blog_id': blogId, 'comment': comment},
+        );
+
+        final data = response.data!;
+        final commentId = data['data']['id'] as int;
+        return commentId;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Create Comment error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Create Comment failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> deleteComment({
+    required int blogId,
+    required int commentId,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.delete<Map<String, dynamic>>(
+          ApiEndpoints.login,
+          data: {'blog_id': blogId, 'comment_id': commentId},
+        );
+
+        final data = response.data;
+        return data?['message'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Delete Comment error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Delete Comment failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> upvoteComment({
+    required int blogId,
+    required int commentId,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.upvoteComment,
+          data: {'blog_id': blogId, 'comment_id': commentId},
+        );
+
+        final data = response.data;
+        return data?['message'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Upvote Comment error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Upvote Comment failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> unupvoteComment({
+    required int blogId,
+    required int commentId,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.delete<Map<String, dynamic>>(
+          ApiEndpoints.unupvoteComment,
+          data: {'blog_id': blogId, 'comment_id': commentId},
+        );
+
+        final data = response.data;
+        return data?['message'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Unupvote Comment error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Unupvote Comment failed. Please try again.');
       },
     ).run();
   }

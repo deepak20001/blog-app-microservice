@@ -23,7 +23,7 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS categories(
             id SERIAL PRIMARY KEY,
             title VARCHAR(255) NOT NULL UNIQUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
@@ -34,7 +34,7 @@ async function initDB() {
             image_url VARCHAR(255) NOT NULL,
             category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
             author_id VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
@@ -42,7 +42,7 @@ async function initDB() {
             id SERIAL PRIMARY KEY,
             blog_id INTEGER NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
             user_id VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
@@ -50,7 +50,7 @@ async function initDB() {
             id SERIAL PRIMARY KEY,
             blog_id INTEGER NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
             user_id VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
         `;
         await sql`
@@ -59,7 +59,7 @@ async function initDB() {
             comment TEXT NOT NULL,
             user_id VARCHAR(255) NOT NULL,
             blog_id INTEGER NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             )
         `;
         await sql`
@@ -69,7 +69,7 @@ async function initDB() {
             comment_id INTEGER NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
             blog_id INTEGER NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
             status VARCHAR(10) NOT NULL CHECK (status IN ('like', 'dislike')),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             )
         `;
 

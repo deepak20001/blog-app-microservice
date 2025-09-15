@@ -25,7 +25,7 @@ class ApiEndpoints {
     required int categoryId,
     required String search,
   }) =>
-      '$blogServiceBaseUrl/blogs-filter?page=$page&limit=$limit&search=$search' +
+      '$blogServiceBaseUrl/blogs/filter?page=$page&limit=$limit&search=$search' +
       (categoryId != 0 ? '&category_id=$categoryId' : '');
   static String blogDetails({required String id}) =>
       '$blogServiceBaseUrl/blogs/$id';
@@ -38,6 +38,12 @@ class ApiEndpoints {
   static String get unupvoteBlog => '$blogServiceBaseUrl/blogs/unupvote-blog';
 
   /// Media Service Endpoints
-  static String get uploadImage => '$mediaServiceBaseUrl/upload';
-  static String get deleteImage => '$mediaServiceBaseUrl/delete';
+  static String get uploadBlogImage => '$mediaServiceBaseUrl/media/blog-image';
+
+  /// Comment Service Endpoints
+  static String fetchComments({required int blogId}) =>
+      '$blogServiceBaseUrl/comments/$blogId';
+  static String get createComment => '$blogServiceBaseUrl/comments';
+  static String get upvoteComment => '$blogServiceBaseUrl/comments/upvote';
+  static String get unupvoteComment => '$blogServiceBaseUrl/comments/unupvote';
 }

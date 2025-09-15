@@ -19,11 +19,11 @@ class BuildSliverBlogDetailsAppbar extends StatelessWidget {
   final BlogDetailsBloc blogDetailsBloc;
 
   void _onSaveBlog(BuildContext context) {
-    blogDetailsBloc.add(SaveBlogEvent(blogId: blog.id));
+    blogDetailsBloc.add(BlogDetailsSaveBlogEvent(blogId: blog.id));
   }
 
   void _onUnsaveBlog(BuildContext context) {
-    blogDetailsBloc.add(UnsaveBlogEvent(blogId: blog.id));
+    blogDetailsBloc.add(BlogDetailsUnsaveBlogEvent(blogId: blog.id));
   }
 
   @override

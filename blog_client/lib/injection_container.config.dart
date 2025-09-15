@@ -24,6 +24,10 @@ import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.d
 import 'package:blog_client/features/blogs/repositories/blogs_remote_repository.dart'
     as _i658;
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart' as _i942;
+import 'package:blog_client/features/create_blog/repositories/create_blog_remote_repository.dart'
+    as _i1021;
+import 'package:blog_client/features/create_blog/viewmodel/create_blog_bloc.dart'
+    as _i535;
 import 'package:blog_client/injection_container.dart' as _i634;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
@@ -62,13 +66,14 @@ extension GetItInjectableX on _i174.GetIt {
         dioClient: gh<_i647.DioClient>(),
       ),
     );
-    gh.lazySingleton<_i509.AuthRemoteRepository>(
-      () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
-    );
     gh.singleton<_i411.BlogDetailsBloc>(
       () => _i411.BlogDetailsBloc(
         blogDetailsRemoteRepository: gh<_i789.BlogDetailsRemoteRepository>(),
+        storageRepository: gh<_i190.SharedPreferencesStorageRepository>(),
       ),
+    );
+    gh.lazySingleton<_i509.AuthRemoteRepository>(
+      () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
     gh.lazySingleton<_i658.BlogsRemoteRepository>(
       () => _i658.BlogsRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
@@ -77,6 +82,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i876.AuthBloc(
         authRemoteRepository: gh<_i509.AuthRemoteRepository>(),
         storageRepository: gh<_i190.SharedPreferencesStorageRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i1021.CreateBlogRemoteRepository>(
+      () => _i1021.BlogsRemoteRepositoryImpl(
+        dioClient: gh<_i647.DioClient>(),
+        imagePicker: gh<_i183.ImagePicker>(),
+      ),
+    );
+    gh.singleton<_i535.CreateBlogBloc>(
+      () => _i535.CreateBlogBloc(
+        createBlogRemoteRepository: gh<_i1021.CreateBlogRemoteRepository>(),
       ),
     );
     gh.singleton<_i942.BlogsBloc>(
