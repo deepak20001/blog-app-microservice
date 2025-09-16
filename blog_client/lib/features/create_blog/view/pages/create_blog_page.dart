@@ -42,8 +42,9 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
     if (_formKey.currentState?.validate() ?? false) {
       html = await _htmlController.getText();
       if (html.trim().isEmpty || html == '<p></p>') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Description is required')),
+        SnackbarUtils.showError(
+          context: context,
+          message: 'Description is required',
         );
         return;
       } else if (!_createBlogBloc.state.categories.any(
@@ -90,8 +91,16 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
       case CreateBlogUploadImageSuccessState(:final uploadedImagePath):
         _onCreateBlog(uploadedImagePath);
         break;
-      case CreateBlogUploadImageFailureState(:final errorMessage):
+      case CreateBlogUploadImageFailureState(:final errorMessage) ||
+          CreateBlogCreateBlogFailureState(:final errorMessage):
         SnackbarUtils.showError(context: context, message: errorMessage);
+        break;
+      case CreateBlogCreateBlogSuccessState():
+        context.router.maybePop();
+        SnackbarUtils.showSuccess(
+          context: context,
+          message: 'Blog created successfully',
+        );
         break;
       default:
         break;
@@ -156,7 +165,19 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
                       htmlController: _htmlController,
                       size: size,
                     ),
-                    CommonButton(text: 'Create', onPressed: _onUploadImage),
+                    BlocSelector<CreateBlogBloc, CreateBlogState, bool>(
+                      selector: (state) {
+                        return state is CreateBlogUploadImageLoadingState ||
+                            state is CreateBlogCreateBlogLoadingState;
+                      },
+                      builder: (context, isLoading) {
+                        return CommonButton(
+                          isLoading: isLoading,
+                          text: 'Create',
+                          onPressed: _onUploadImage,
+                        );
+                      },
+                    ),
                     context.sizedBoxHeight(numD05),
                   ],
                 ),

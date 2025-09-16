@@ -46,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           _storageRepository.userId = user.id;
           _storageRepository.userName = user.username;
           _storageRepository.userEmail = user.email;
+          _storageRepository.userBio = user.bio;
           _storageRepository.userProfileImage = user.avatar;
           emit(AuthLoginSuccessState(successMessage: successMessage));
         },

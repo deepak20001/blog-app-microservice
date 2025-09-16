@@ -36,6 +36,8 @@ class ApiEndpoints {
   static String get unsaveBlog => '$blogServiceBaseUrl/blogs/unsave-blog';
   static String get upvoteBlog => '$blogServiceBaseUrl/blogs/upvote-blog';
   static String get unupvoteBlog => '$blogServiceBaseUrl/blogs/unupvote-blog';
+  static String get getMyBlogs => '$blogServiceBaseUrl/blogs/my-blogs';
+  static String get getSavedBlogs => '$blogServiceBaseUrl/blogs/saved-blogs';
 
   /// Media Service Endpoints
   static String get uploadBlogImage => '$mediaServiceBaseUrl/media/blog-image';

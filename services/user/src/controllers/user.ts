@@ -205,7 +205,7 @@ export const getUserProfile = async(req: Request, res: Response) => {
                 role: userRecord.role,
                 isVerified: userRecord.isVerified,
                 followersCount: followersRecordCount,
-                followingsRecordCount: followingsRecordCount,
+                followingsCount: followingsRecordCount,
             },
         });
     } catch (error: any) {

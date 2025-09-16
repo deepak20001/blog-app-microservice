@@ -10,6 +10,7 @@ import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class BuildBlogCard extends StatelessWidget {
   const BuildBlogCard({
@@ -22,18 +23,22 @@ class BuildBlogCard extends StatelessWidget {
   final VoidCallback? onTap;
   final BlogsBloc blogsBloc;
 
+  // Save blog
   void _onSaveBlog(BuildContext context) {
     blogsBloc.add(SaveBlogEvent(blogId: blog.id));
   }
 
+  // Unsave blog
   void _onUnsaveBlog(BuildContext context) {
     blogsBloc.add(UnsaveBlogEvent(blogId: blog.id));
   }
 
+  // Upvote blog
   void _onUpvoteBlog(BuildContext context) {
     blogsBloc.add(UpvoteBlogEvent(blogId: blog.id));
   }
 
+  // Unupvote blog
   void _onUnupvoteBlog(BuildContext context) {
     blogsBloc.add(UnupvoteBlogEvent(blogId: blog.id));
   }
@@ -87,13 +92,23 @@ class BuildBlogCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  CommonText(
-                    text: blog.description,
-                    style: context.bodyMedium.copyWith(
-                      color: AppPallete.textSecondary,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                  Html(
+                    data: blog.description,
+                    style: {
+                      'body': Style(
+                        maxLines: 3,
+                        textOverflow: TextOverflow.ellipsis,
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                      ),
+                      'p': Style(
+                        maxLines: 2,
+                        textOverflow: TextOverflow.ellipsis,
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                        color: AppPallete.textSecondary,
+                      ),
+                    },
                   ),
                   Row(
                     children: [

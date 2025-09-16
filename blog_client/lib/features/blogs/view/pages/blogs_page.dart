@@ -113,6 +113,14 @@ class _BlogsPageState extends State<BlogsPage> {
               ),
             ),
             centerTitle: true,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  context.router.push(const ProfileRoute());
+                },
+                icon: Icon(Icons.person, color: AppPallete.primaryColor),
+              ),
+            ],
           ),
           floatingActionButton: FloatingActionButton(
             backgroundColor: AppPallete.primaryColor,

@@ -14,6 +14,7 @@ class PreferenceKeys {
   static String userIdKey = 'userId';
   static String userNameKey = 'userName';
   static String userEmailKey = 'userEmail';
+  static String userBioKey = 'userBio';
   static String userProfileImageKey = 'userProfileImage';
 }
 

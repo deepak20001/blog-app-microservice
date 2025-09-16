@@ -17,8 +17,8 @@ const createBlogSchema = z.object({
         min(3, "Name must be at least 3 characters long").
         max(200, "Name must not exceed 200 characters"),
     description: z.string().
-        min(3, "Name must be at least 3 characters long").
-        max(1000, "Name must not exceed 200 characters"),
+        min(3, "Description must be at least 3 characters long").
+        max(10000, "Description must not exceed 10000 characters"),
     image: z.string(),
     category_id: z.number(),
 });
@@ -764,3 +764,277 @@ export const unupvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
     }
 }
 
+export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+
+        const myBlogsCount = await sql`
+            SELECT COUNT(*):: int as count
+            FROM blogs 
+            WHERE author_id = ${payloadData._id}
+        `;
+        if(!myBlogsCount || myBlogsCount.length === 0) {
+            return res.status(500).json({
+                success: false,
+                error: "Error finding blogs count",
+            })
+        }
+
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+        const totalItems = parseInt(myBlogsCount[0]?.count);
+        const totalPages = Math.ceil(totalItems/limit);
+
+        const result = await sql`
+            SELECT * FROM blogs 
+            WHERE author_id = ${payloadData._id}
+            ORDER BY created_at DESC
+            LIMIT ${limit} OFFSET ${offset}    
+        `;
+
+        if(!result) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching blogs",
+            });
+        } 
+
+        if(result.length === 0) {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                pagination: {
+                    current_page: page,
+                    total_pages: totalPages,
+                    total_items: totalItems,
+                    items_per_page: limit,
+                    has_next: page < totalPages,
+                    has_prev: page > 1,
+                },
+            });
+        } 
+
+        // author
+        const token = getTokenFromHeader(req);
+        if(!token) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid token',
+            });
+        }
+        const authorResult = await axios.get(
+            `${process.env.USER_SERVICE_URL}/api/v1/users/${payloadData._id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+        if(!authorResult) {
+            return res.status(400).json({
+                success: false,
+                error: "Error fetch author details",
+            });
+        }
+
+        // vote-count
+        const blogIds = result.map(blog => blog.id);
+        const voteCounts = await sql`
+            SELECT blog_id, COUNT(*)::int as count
+            FROM upvotes
+            WHERE blog_id = ANY(${blogIds})
+            GROUP BY blog_id
+        `;
+        const voteCountMap = Object.fromEntries(voteCounts.map(v => [v.blog_id, v.count]));
+
+        // is-votes
+        const userVotes = await sql`
+            SELECT blog_id
+            FROM upvotes
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+        `;
+        const votedMap = new Set(userVotes.map(v => v.blog_id));
+
+        // is-saved
+        const userSaved = await sql`
+            SELECT blog_id
+            FROM savedblogs
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+        `;
+        const savedMap = new Set(userSaved.map(v => v.blog_id));
+
+        
+
+        const updatedResponse = result.map((blog) => {
+            return ({
+                ...blog,
+                author: authorResult.data['data'],
+                vote_count: voteCountMap[blog.id] || 0,
+                is_voted: votedMap.has(String(blog.id)),
+                is_saved: savedMap.has(String(blog.id)), 
+            });
+        })
+        console.log(updatedResponse)
+        return res.status(200).json({
+            success: true,
+            data: updatedResponse,
+            pagination: {
+                current_page: page,
+                total_pages: totalPages,
+                total_items: totalItems,
+                items_per_page: limit,
+                has_next: page < totalPages,
+                has_prev: page > 1,
+            },
+        });
+    } catch (error: any) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthenticated user",
+            });
+        }
+        
+        // get-my-saved-blogs
+        const mysavedBlogs = await sql`
+            SELECT * FROM savedblogs
+            WHERE user_id = ${payloadData._id}
+        `;
+        console.log(mysavedBlogs);
+        const savedBlogsIds = mysavedBlogs.map(v => parseInt(v.blog_id));
+        
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+        const totalItems = mysavedBlogs.length;
+        const totalPages = Math.ceil(totalItems/limit);
+
+        const result = await sql`
+            SELECT * FROM blogs 
+            WHERE id = ANY(${savedBlogsIds})
+            ORDER BY created_at DESC
+            LIMIT ${limit} OFFSET ${offset}    
+        `;
+        if(!result) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching saved blogs",
+            });
+        } 
+        if(result.length === 0) {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                pagination: {
+                    current_page: page,
+                    total_pages: totalPages,
+                    total_items: totalItems,
+                    items_per_page: limit,
+                    has_next: page < totalPages,
+                    has_prev: page > 1,
+                },
+            });
+        } 
+        
+        // authors
+        const authorIds = [...new Set(result.map(blog => blog.author_id))];
+        const token = getTokenFromHeader(req);
+        if (!token) {
+                return res.status(401).json({
+                success: false,
+                error: "Invalid token",
+            });
+        }
+        const authorsResult = await axios.post(
+            `${process.env.USER_SERVICE_URL}/api/v1/users/profiles`,
+            {
+                ids: authorIds,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        if(!authorsResult) {
+            return res.status(400).json({
+                success: false,
+                error: "Error fetch authors details",
+            });
+        }
+        const authorsMap: Record<string, any> = {};
+        for (const author of authorsResult.data.data) {
+            authorsMap[author._id] = author;
+        }
+        
+        // vote-count
+        const voteCounts = await sql`
+            SELECT blog_id, COUNT(*)::int as count
+            FROM upvotes
+            WHERE blog_id = ANY(${savedBlogsIds})
+            GROUP BY blog_id
+        `;
+        const voteCountMap = Object.fromEntries(voteCounts.map(v => [v.blog_id, v.count]));
+        // is-voted
+        const userVotes = await sql`
+            SELECT blog_id
+            FROM upvotes
+            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${payloadData._id}
+        `;
+        const votedMap = new Set(userVotes.map(v => v.blog_id));
+        // is-saved
+        const userSaves = await sql`
+            SELECT blog_id
+            FROM savedblogs
+            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${payloadData._id}
+        `;
+        const savedMap = new Set(userSaves.map(v => v.blog_id));
+
+        const updatedResult = result.map(blog => {
+            return ({
+                ...blog,
+                author: authorsMap[blog.author_id] || null,
+                vote_count: voteCountMap[blog.id] || 0,
+                is_voted: votedMap.has(String(blog.id)),
+                is_saved: savedMap.has(String(blog.id)), 
+            })
+        } );
+
+        return res.status(200).json({
+            success: true,
+            data: updatedResult,
+            pagination: {
+                current_page: page,
+                total_pages: totalPages,
+                total_items: totalItems,
+                items_per_page: limit,
+                has_next: page < totalPages,
+                has_prev: page > 1,
+            },
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}

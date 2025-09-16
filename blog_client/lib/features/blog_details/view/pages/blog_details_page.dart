@@ -234,20 +234,7 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
                                   width: 1,
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CommonText(
-                                    text: 'Description',
-                                    style: context.titleSmall.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppPallete.textPrimary,
-                                    ),
-                                  ),
-                                  context.sizedBoxHeight(numD015),
-                                  Html(data: blog.description),
-                                ],
-                              ),
+                              child: Html(data: blog.description),
                             ),
                             context.sizedBoxHeight(numD03),
                             BuildBlogCommentsSection(

@@ -7,7 +7,9 @@ import {
     getBlogById, 
     getBlogs, 
     getCategories, 
+    myBlogs, 
     saveBlog, 
+    savedBlogs, 
     unsaveBlog, 
     unupvoteBlog, 
     updateBlog, 
@@ -31,6 +33,8 @@ router.delete("/unupvote-blog", isAuth, unupvoteBlog);
 // Blog CRUD
 router.post("/", isAuth, createBlog);
 router.get("/filter", isAuth, getBlogs);
+router.get("/my-blogs", isAuth, myBlogs);
+router.get("/saved-blogs", isAuth, savedBlogs);
 router.get("/:id", isAuth, getBlogById);
 router.patch("/:id", isAuth, updateBlog);
 router.delete("/:id", isAuth, deleteBlog);

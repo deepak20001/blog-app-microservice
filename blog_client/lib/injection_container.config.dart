@@ -28,6 +28,10 @@ import 'package:blog_client/features/create_blog/repositories/create_blog_remote
     as _i1021;
 import 'package:blog_client/features/create_blog/viewmodel/create_blog_bloc.dart'
     as _i535;
+import 'package:blog_client/features/profile/repositories/profile_remote_repository.dart'
+    as _i391;
+import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart'
+    as _i886;
 import 'package:blog_client/injection_container.dart' as _i634;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
@@ -72,6 +76,9 @@ extension GetItInjectableX on _i174.GetIt {
         storageRepository: gh<_i190.SharedPreferencesStorageRepository>(),
       ),
     );
+    gh.lazySingleton<_i391.ProfileRemoteRepository>(
+      () => _i391.ProfileRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
+    );
     gh.lazySingleton<_i509.AuthRemoteRepository>(
       () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
@@ -88,6 +95,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1021.BlogsRemoteRepositoryImpl(
         dioClient: gh<_i647.DioClient>(),
         imagePicker: gh<_i183.ImagePicker>(),
+      ),
+    );
+    gh.singleton<_i886.ProfileBloc>(
+      () => _i886.ProfileBloc(
+        profileRemoteRepository: gh<_i391.ProfileRemoteRepository>(),
+        storageRepository: gh<_i190.SharedPreferencesStorageRepository>(),
       ),
     );
     gh.singleton<_i535.CreateBlogBloc>(

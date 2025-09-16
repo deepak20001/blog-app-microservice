@@ -24,6 +24,10 @@ abstract class SharedPreferencesStorageRepository {
   String get userEmail;
   set userEmail(String? value);
 
+  /// USER_BIO
+  String get userBio;
+  set userBio(String? value);
+
   /// USER_PROFILE_IMAGE
   String get userProfileImage;
   set userProfileImage(String? value);
@@ -88,6 +92,16 @@ class SharedPreferencesStorageRepositoryImpl
   @override
   set userEmail(String? value) {
     _prefs.setString(PreferenceKeys.userEmailKey, value ?? '');
+  }
+
+  /// USER_BIO_GETTER
+  @override
+  String get userBio => _prefs.getString(PreferenceKeys.userBioKey) ?? '';
+
+  /// USER_BIO_SETTER
+  @override
+  set userBio(String? value) {
+    _prefs.setString(PreferenceKeys.userBioKey, value ?? '');
   }
 
   /// USER_PROFILE_IMAGE_GETTER

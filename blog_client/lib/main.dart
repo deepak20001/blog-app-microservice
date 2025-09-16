@@ -6,6 +6,7 @@ import 'package:blog_client/features/auth/viewmodel/auth_bloc.dart';
 import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
 import 'package:blog_client/features/create_blog/viewmodel/create_blog_bloc.dart';
+import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart';
 import 'package:blog_client/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
         BlocProvider(create: (_) => getIt<BlogsBloc>()),
         BlocProvider(create: (_) => getIt<BlogDetailsBloc>()),
         BlocProvider(create: (_) => getIt<CreateBlogBloc>()),
+        BlocProvider(create: (_) => getIt<ProfileBloc>()),
       ],
       child: MyApp(),
     ),
