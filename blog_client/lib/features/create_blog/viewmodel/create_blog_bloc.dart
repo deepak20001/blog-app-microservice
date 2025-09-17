@@ -19,6 +19,13 @@ class CreateBlogBloc extends Bloc<CreateBlogEvent, CreateBlogState> {
     on<CreateBlogSelectCategoryEvent>(_onCreateBlogSelectCategoryRequested);
     on<CreateBlogUploadImageEvent>(_onCreateBlogUploadImageRequested);
     on<CreateBlogCreateBlogEvent>(_onCreateBlogCreateBlogRequested);
+    on<CreateBlogGenerateAiTitleEvent>(_onCreateBlogGenerateAiTitleRequested);
+    on<CreateBlogGenerateAiShortDescriptionEvent>(
+      _onCreateBlogGenerateAiShortDescriptionRequested,
+    );
+    on<CreateBlogGenerateAiDescriptionEvent>(
+      _onCreateBlogGenerateAiDescriptionRequested,
+    );
   }
   final CreateBlogRemoteRepository _createBlogRemoteRepository;
 
@@ -207,6 +214,7 @@ class CreateBlogBloc extends Bloc<CreateBlogEvent, CreateBlogState> {
       final result = await _createBlogRemoteRepository.createBlog(
         imagePath: event.imagePath,
         title: event.title,
+        shortDescription: event.shortDescription,
         description: event.description,
         categoryId: event.categoryId,
       );
@@ -233,6 +241,171 @@ class CreateBlogBloc extends Bloc<CreateBlogEvent, CreateBlogState> {
       );
       emit(
         CreateBlogCreateBlogFailureState(
+          errorMessage: 'An unexpected error occurred. Please try again.',
+          imagePath: state.imagePath,
+          categories: state.categories,
+        ),
+      );
+    }
+  }
+
+  // Handle generate ai title
+  Future<void> _onCreateBlogGenerateAiTitleRequested(
+    CreateBlogGenerateAiTitleEvent event,
+    Emitter<CreateBlogState> emit,
+  ) async {
+    if (state is CreateBlogGenerateAiTitleLoadingState) return;
+    emit(
+      CreateBlogGenerateAiTitleLoadingState(
+        imagePath: state.imagePath,
+        categories: state.categories,
+      ),
+    );
+    try {
+      final result = await _createBlogRemoteRepository.generateAiTitle(
+        title: event.title,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Generate ai title failed: ${failure.message}');
+          emit(
+            CreateBlogGenerateAiTitleFailureState(
+              errorMessage: failure.message,
+              imagePath: state.imagePath,
+              categories: state.categories,
+            ),
+          );
+        },
+        (String generatedAiTitle) async {
+          emit(
+            CreateBlogGenerateAiTitleSuccessState(
+              imagePath: state.imagePath,
+              categories: state.categories,
+              aiTitle: generatedAiTitle,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during generate ai title: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        CreateBlogGenerateAiTitleFailureState(
+          errorMessage: 'An unexpected error occurred. Please try again.',
+          imagePath: state.imagePath,
+          categories: state.categories,
+        ),
+      );
+    }
+  }
+
+  // Handle generate ai short description
+  Future<void> _onCreateBlogGenerateAiShortDescriptionRequested(
+    CreateBlogGenerateAiShortDescriptionEvent event,
+    Emitter<CreateBlogState> emit,
+  ) async {
+    if (state is CreateBlogGenerateAiShortDescriptionLoadingState) return;
+    emit(
+      CreateBlogGenerateAiShortDescriptionLoadingState(
+        imagePath: state.imagePath,
+        categories: state.categories,
+      ),
+    );
+    try {
+      final result = await _createBlogRemoteRepository
+          .generateAiShortDescription(
+            title: event.title,
+            shortDescription: event.shortDescription,
+          );
+
+      await result.fold(
+        (failure) {
+          devtools.log(
+            'Generate ai short description failed: ${failure.message}',
+          );
+          emit(
+            CreateBlogGenerateAiShortDescriptionFailureState(
+              errorMessage: failure.message,
+              imagePath: state.imagePath,
+              categories: state.categories,
+            ),
+          );
+        },
+        (String generatedAiShortDescription) async {
+          emit(
+            CreateBlogGenerateAiShortDescriptionSuccessState(
+              categories: state.categories,
+              aiShortDescription: generatedAiShortDescription,
+              imagePath: state.imagePath,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during generate ai short description: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        CreateBlogGenerateAiShortDescriptionFailureState(
+          errorMessage: 'An unexpected error occurred. Please try again.',
+          imagePath: state.imagePath,
+          categories: state.categories,
+        ),
+      );
+    }
+  }
+
+  // Handle generate ai description
+  Future<void> _onCreateBlogGenerateAiDescriptionRequested(
+    CreateBlogGenerateAiDescriptionEvent event,
+    Emitter<CreateBlogState> emit,
+  ) async {
+    if (state is CreateBlogGenerateAiDescriptionLoadingState) return;
+    emit(
+      CreateBlogGenerateAiDescriptionLoadingState(
+        imagePath: state.imagePath,
+        categories: state.categories,
+      ),
+    );
+    try {
+      final result = await _createBlogRemoteRepository.generateAiDescription(
+        title: event.title,
+        shortDescription: event.shortDescription,
+        description: event.description,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Generate ai description failed: ${failure.message}');
+          emit(
+            CreateBlogGenerateAiDescriptionFailureState(
+              errorMessage: failure.message,
+              imagePath: state.imagePath,
+              categories: state.categories,
+            ),
+          );
+        },
+        (String generatedAiDescription) async {
+          emit(
+            CreateBlogGenerateAiDescriptionSuccessState(
+              categories: state.categories,
+              aiDescription: generatedAiDescription,
+              imagePath: state.imagePath,
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during generate ai description: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        CreateBlogGenerateAiDescriptionFailureState(
           errorMessage: 'An unexpected error occurred. Please try again.',
           imagePath: state.imagePath,
           categories: state.categories,

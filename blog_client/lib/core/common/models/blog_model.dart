@@ -9,6 +9,7 @@ sealed class BlogModel with _$BlogModel {
   const factory BlogModel({
     @Default(0) int id,
     @Default('') String title,
+    @JsonKey(name: 'short_description') @Default('') String shortDescription,
     @Default('') String description,
     @JsonKey(name: 'image_url') @Default('') String imageUrl,
     @JsonKey(name: 'category_id') @Default('') String categoryId,

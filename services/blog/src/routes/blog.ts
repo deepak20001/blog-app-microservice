@@ -4,6 +4,9 @@ import {
     createBlog, 
     createCategory, 
     deleteBlog, 
+    generateAiDescription, 
+    generateAiShortDescription, 
+    generateAiTitle, 
     getBlogById, 
     getBlogs, 
     getCategories, 
@@ -18,6 +21,11 @@ import {
     } from "../controllers/blog.js";
 
 const router = express();
+
+// ai
+router.post("/ai-title", isAuth, generateAiTitle);
+router.post("/ai-short-desc", isAuth, generateAiShortDescription);
+router.post("/ai-desc", isAuth, generateAiDescription);
 
 // Categories
 router.post("/category", isAuth, createCategory);

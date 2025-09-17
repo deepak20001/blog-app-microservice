@@ -5,7 +5,9 @@ import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/widgets/common_button.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
 import 'package:blog_client/core/common/widgets/common_text_form_field_first.dart';
+import 'package:blog_client/core/common/widgets/loader.dart';
 import 'package:blog_client/core/constants/constants.dart';
+import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/core/utils/snack_bar_utils.dart';
 import 'package:blog_client/core/utils/validation_helper.dart';
 import 'package:blog_client/features/create_blog/view/widgets/build_category_selection.dart';
@@ -27,6 +29,8 @@ class CreateBlogPage extends StatefulWidget {
 
 class _CreateBlogPageState extends State<CreateBlogPage> {
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _shortDescriptionController =
+      TextEditingController();
   final HtmlEditorController _htmlController = HtmlEditorController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final CreateBlogBloc _createBlogBloc = getIt<CreateBlogBloc>();
@@ -38,6 +42,7 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
     _createBlogBloc.add(const CreateBlogGetCategoriesEvent());
   }
 
+  // Handle upload image
   Future<void> _onUploadImage() async {
     if (_formKey.currentState?.validate() ?? false) {
       html = await _htmlController.getText();
@@ -60,6 +65,7 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
     }
   }
 
+  // Handle create blog
   Future<void> _onCreateBlog(String uploadedImagePath) async {
     if (_formKey.currentState?.validate() ?? false) {
       final categoryId = _createBlogBloc.state.categories
@@ -75,6 +81,7 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
       _createBlogBloc.add(
         CreateBlogCreateBlogEvent(
           title: _titleController.text.trim(),
+          shortDescription: _shortDescriptionController.text.trim(),
           description: html,
           imagePath: uploadedImagePath,
           categoryId: categoryId,
@@ -83,10 +90,82 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
     }
   }
 
+  // Handle generate ai title
+  void _onGenerateAiTitle() {
+    if (_titleController.text.trim().isEmpty) {
+      SnackbarUtils.showError(context: context, message: 'Title is required');
+      return;
+    }
+    _createBlogBloc.add(
+      CreateBlogGenerateAiTitleEvent(title: _titleController.text.trim()),
+    );
+  }
+
+  // Handle generate ai short description
+  void _onGenerateAiShortDescription() {
+    if (_titleController.text.trim().isEmpty) {
+      SnackbarUtils.showError(context: context, message: 'Title is required');
+      return;
+    }
+    if (_shortDescriptionController.text.trim().isEmpty) {
+      SnackbarUtils.showError(
+        context: context,
+        message: 'Short description is required',
+      );
+      return;
+    }
+    _createBlogBloc.add(
+      CreateBlogGenerateAiShortDescriptionEvent(
+        title: _titleController.text.trim(),
+        shortDescription: _shortDescriptionController.text.trim(),
+      ),
+    );
+  }
+
+  // Handle generate ai description
+  Future<void> _onGenerateAiDescription() async {
+    if (_titleController.text.trim().isEmpty) {
+      SnackbarUtils.showError(context: context, message: 'Title is required');
+      return;
+    }
+    if (_shortDescriptionController.text.trim().isEmpty) {
+      SnackbarUtils.showError(
+        context: context,
+        message: 'Short description is required',
+      );
+      return;
+    }
+
+    final currentHtml = await _htmlController.getText();
+    _createBlogBloc.add(
+      CreateBlogGenerateAiDescriptionEvent(
+        title: _titleController.text.trim(),
+        shortDescription: _shortDescriptionController.text.trim(),
+        description: currentHtml,
+      ),
+    );
+  }
+
   void _onBlocListener(BuildContext context, CreateBlogState state) {
     switch (state) {
-      case CreateBlogGetCategoriesFailureState(:final errorMessage):
+      case CreateBlogGetCategoriesFailureState(:final errorMessage) ||
+          CreateBlogGenerateAiTitleFailureState(:final errorMessage) ||
+          CreateBlogGenerateAiShortDescriptionFailureState(
+            :final errorMessage,
+          ) ||
+          CreateBlogGenerateAiDescriptionFailureState(:final errorMessage):
         SnackbarUtils.showError(context: context, message: errorMessage);
+        break;
+      case CreateBlogGenerateAiTitleSuccessState(:final aiTitle):
+        _titleController.text = aiTitle;
+        break;
+      case CreateBlogGenerateAiShortDescriptionSuccessState(
+        :final aiShortDescription,
+      ):
+        _shortDescriptionController.text = aiShortDescription;
+        break;
+      case CreateBlogGenerateAiDescriptionSuccessState(:final aiDescription):
+        _htmlController.setText(aiDescription);
         break;
       case CreateBlogUploadImageSuccessState(:final uploadedImagePath):
         _onCreateBlog(uploadedImagePath);
@@ -110,6 +189,7 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
   @override
   void dispose() {
     _titleController.dispose();
+    _shortDescriptionController.dispose();
     super.dispose();
   }
 
@@ -141,10 +221,76 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
                       label: 'Title',
                       maxLength: 200,
                       showCharacterCount: true,
+                      suffixIcon:
+                          BlocSelector<CreateBlogBloc, CreateBlogState, bool>(
+                            bloc: _createBlogBloc,
+                            selector: (state) =>
+                                state is CreateBlogGenerateAiTitleLoadingState,
+                            builder: (context, isLoading) {
+                              return IconButton(
+                                tooltip: 'AI generate title',
+                                onPressed: isLoading
+                                    ? null
+                                    : _onGenerateAiTitle,
+                                icon: isLoading
+                                    ? SizedBox(
+                                        width: size.width * numD06,
+                                        height: size.width * numD06,
+                                        child: Loader(
+                                          color: AppPallete.primaryColor,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.auto_awesome,
+                                        color: AppPallete.primaryColor,
+                                      ),
+                              );
+                            },
+                          ),
                       validator: (value) =>
                           ValidationHelper.validateRequiredFields(
                             value: value,
                             fieldName: 'Title',
+                          ),
+                    ),
+                    CommonTextFormField(
+                      controller: _shortDescriptionController,
+                      hintText: 'Enter short description',
+                      label: 'Short Description',
+                      maxLines: 3,
+                      maxLength: 255,
+                      showCharacterCount: true,
+                      suffixIcon:
+                          BlocSelector<CreateBlogBloc, CreateBlogState, bool>(
+                            bloc: _createBlogBloc,
+                            selector: (state) =>
+                                state
+                                    is CreateBlogGenerateAiShortDescriptionLoadingState,
+                            builder: (context, isLoading) {
+                              return IconButton(
+                                tooltip: 'AI generate short description',
+                                onPressed: isLoading
+                                    ? null
+                                    : _onGenerateAiShortDescription,
+                                icon: isLoading
+                                    ? SizedBox(
+                                        width: size.width * numD06,
+                                        height: size.width * numD06,
+                                        child: Loader(
+                                          color: AppPallete.primaryColor,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.auto_awesome,
+                                        color: AppPallete.primaryColor,
+                                      ),
+                              );
+                            },
+                          ),
+                      validator: (value) =>
+                          ValidationHelper.validateRequiredFields(
+                            value: value,
+                            fieldName: 'Short Description',
                           ),
                     ),
                     BuildImagePickSection(
@@ -155,11 +301,42 @@ class _CreateBlogPageState extends State<CreateBlogPage> {
                       size: size,
                       createBlogBloc: _createBlogBloc,
                     ),
-                    CommonText(
-                      text: 'Description',
-                      style: context.labelLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CommonText(
+                          text: 'Description',
+                          style: context.labelLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        BlocSelector<CreateBlogBloc, CreateBlogState, bool>(
+                          bloc: _createBlogBloc,
+                          selector: (state) =>
+                              state
+                                  is CreateBlogGenerateAiDescriptionLoadingState,
+                          builder: (context, isLoading) {
+                            return IconButton(
+                              tooltip: 'AI generate description',
+                              onPressed: isLoading
+                                  ? null
+                                  : _onGenerateAiDescription,
+                              icon: isLoading
+                                  ? SizedBox(
+                                      width: size.width * numD06,
+                                      height: size.width * numD06,
+                                      child: Loader(
+                                        color: AppPallete.primaryColor,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.auto_awesome,
+                                      color: AppPallete.primaryColor,
+                                    ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     BuildHtmlEditor(
                       htmlController: _htmlController,

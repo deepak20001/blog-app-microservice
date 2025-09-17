@@ -33,10 +33,7 @@ export const getFollowers = async(req: AuthenticatedRequest, res: Response) => {
         const followingsIdsResult = await Relationship.find({
             followerId: payloadData._id
         });
-        console.log(followingsIdsResult)
         const followingsIdsSet = new Set(followingsIdsResult.map(v => v.followingId.toString()));
-        console.log(followingsIdsSet)
-        console.log(followersResult);
         const formattedResult = followersResult.map(r => ({
             _id: r._id,
             follower: r.followerId,   

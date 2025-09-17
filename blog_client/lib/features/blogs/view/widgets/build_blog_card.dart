@@ -92,23 +92,11 @@ class BuildBlogCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Html(
-                    data: blog.description,
-                    style: {
-                      'body': Style(
-                        maxLines: 3,
-                        textOverflow: TextOverflow.ellipsis,
-                        margin: Margins.zero,
-                        padding: HtmlPaddings.zero,
-                      ),
-                      'p': Style(
-                        maxLines: 2,
-                        textOverflow: TextOverflow.ellipsis,
-                        margin: Margins.zero,
-                        padding: HtmlPaddings.zero,
-                        color: AppPallete.textSecondary,
-                      ),
-                    },
+                  CommonText(
+                    text: blog.shortDescription,
+                    style: context.bodySmall.copyWith(
+                      color: AppPallete.textSecondary,
+                    ),
                   ),
                   Row(
                     children: [

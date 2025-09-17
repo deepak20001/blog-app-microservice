@@ -134,3 +134,99 @@ class CreateBlogCreateBlogFailureState extends CreateBlogState {
   @override
   List<Object?> get props => [errorMessage, imagePath, categories];
 }
+
+// Generate Ai Title States
+class CreateBlogGenerateAiTitleLoadingState extends CreateBlogState {
+  const CreateBlogGenerateAiTitleLoadingState({
+    required super.imagePath,
+    required super.categories,
+  });
+}
+
+class CreateBlogGenerateAiTitleSuccessState extends CreateBlogState {
+  const CreateBlogGenerateAiTitleSuccessState({
+    required super.imagePath,
+    required super.categories,
+    required this.aiTitle,
+  });
+  final String aiTitle;
+
+  @override
+  List<Object?> get props => [aiTitle, imagePath, categories];
+}
+
+class CreateBlogGenerateAiTitleFailureState extends CreateBlogState {
+  const CreateBlogGenerateAiTitleFailureState({
+    required super.imagePath,
+    required super.categories,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, imagePath, categories];
+}
+
+// Generate Ai Short Description States
+class CreateBlogGenerateAiShortDescriptionLoadingState extends CreateBlogState {
+  const CreateBlogGenerateAiShortDescriptionLoadingState({
+    required super.imagePath,
+    required super.categories,
+  });
+}
+
+class CreateBlogGenerateAiShortDescriptionSuccessState extends CreateBlogState {
+  const CreateBlogGenerateAiShortDescriptionSuccessState({
+    required super.imagePath,
+    required super.categories,
+    required this.aiShortDescription,
+  });
+  final String aiShortDescription;
+
+  @override
+  List<Object?> get props => [aiShortDescription, imagePath, categories];
+}
+
+class CreateBlogGenerateAiShortDescriptionFailureState extends CreateBlogState {
+  const CreateBlogGenerateAiShortDescriptionFailureState({
+    required super.imagePath,
+    required super.categories,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, imagePath, categories];
+}
+
+// Generate Ai Description States
+class CreateBlogGenerateAiDescriptionLoadingState extends CreateBlogState {
+  const CreateBlogGenerateAiDescriptionLoadingState({
+    required super.imagePath,
+    required super.categories,
+  });
+}
+
+class CreateBlogGenerateAiDescriptionSuccessState extends CreateBlogState {
+  const CreateBlogGenerateAiDescriptionSuccessState({
+    required super.imagePath,
+    required super.categories,
+    required this.aiDescription,
+  });
+  final String aiDescription;
+
+  @override
+  List<Object?> get props => [aiDescription, imagePath, categories];
+}
+
+class CreateBlogGenerateAiDescriptionFailureState extends CreateBlogState {
+  const CreateBlogGenerateAiDescriptionFailureState({
+    required super.imagePath,
+    required super.categories,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, imagePath, categories];
+}

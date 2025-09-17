@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BlogModel {
 
- int get id; String get title; String get description;@JsonKey(name: 'image_url') String get imageUrl;@JsonKey(name: 'category_id') String get categoryId;@JsonKey(name: 'author_id') String get authorId;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'vote_count') int get voteCount;@JsonKey(name: 'is_voted') bool get isLiked;@JsonKey(name: 'is_saved') bool get isSaved; ProfileModel get author;
+ int get id; String get title;@JsonKey(name: 'short_description') String get shortDescription; String get description;@JsonKey(name: 'image_url') String get imageUrl;@JsonKey(name: 'category_id') String get categoryId;@JsonKey(name: 'author_id') String get authorId;@JsonKey(name: 'created_at') String get createdAt;@JsonKey(name: 'vote_count') int get voteCount;@JsonKey(name: 'is_voted') bool get isLiked;@JsonKey(name: 'is_saved') bool get isSaved; ProfileModel get author;
 /// Create a copy of BlogModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $BlogModelCopyWith<BlogModel> get copyWith => _$BlogModelCopyWithImpl<BlogModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.shortDescription, shortDescription) || other.shortDescription == shortDescription)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
+int get hashCode => Object.hash(runtimeType,id,title,shortDescription,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
 
 @override
 String toString() {
-  return 'BlogModel(id: $id, title: $title, description: $description, imageUrl: $imageUrl, categoryId: $categoryId, authorId: $authorId, createdAt: $createdAt, voteCount: $voteCount, isLiked: $isLiked, isSaved: $isSaved, author: $author)';
+  return 'BlogModel(id: $id, title: $title, shortDescription: $shortDescription, description: $description, imageUrl: $imageUrl, categoryId: $categoryId, authorId: $authorId, createdAt: $createdAt, voteCount: $voteCount, isLiked: $isLiked, isSaved: $isSaved, author: $author)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $BlogModelCopyWith<$Res>  {
   factory $BlogModelCopyWith(BlogModel value, $Res Function(BlogModel) _then) = _$BlogModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String title, String description,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'category_id') String categoryId,@JsonKey(name: 'author_id') String authorId,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'vote_count') int voteCount,@JsonKey(name: 'is_voted') bool isLiked,@JsonKey(name: 'is_saved') bool isSaved, ProfileModel author
+ int id, String title,@JsonKey(name: 'short_description') String shortDescription, String description,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'category_id') String categoryId,@JsonKey(name: 'author_id') String authorId,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'vote_count') int voteCount,@JsonKey(name: 'is_voted') bool isLiked,@JsonKey(name: 'is_saved') bool isSaved, ProfileModel author
 });
 
 
@@ -65,10 +65,11 @@ class _$BlogModelCopyWithImpl<$Res>
 
 /// Create a copy of BlogModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? imageUrl = null,Object? categoryId = null,Object? authorId = null,Object? createdAt = null,Object? voteCount = null,Object? isLiked = null,Object? isSaved = null,Object? author = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? shortDescription = null,Object? description = null,Object? imageUrl = null,Object? categoryId = null,Object? authorId = null,Object? createdAt = null,Object? voteCount = null,Object? isLiked = null,Object? isSaved = null,Object? author = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,shortDescription: null == shortDescription ? _self.shortDescription : shortDescription // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title, @JsonKey(name: 'short_description')  String shortDescription,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BlogModel() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);case _:
+return $default(_that.id,_that.title,_that.shortDescription,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.cate
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title, @JsonKey(name: 'short_description')  String shortDescription,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)  $default,) {final _that = this;
 switch (_that) {
 case _BlogModel():
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);}
+return $default(_that.id,_that.title,_that.shortDescription,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -207,10 +208,10 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.cate
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title, @JsonKey(name: 'short_description')  String shortDescription,  String description, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'category_id')  String categoryId, @JsonKey(name: 'author_id')  String authorId, @JsonKey(name: 'created_at')  String createdAt, @JsonKey(name: 'vote_count')  int voteCount, @JsonKey(name: 'is_voted')  bool isLiked, @JsonKey(name: 'is_saved')  bool isSaved,  ProfileModel author)?  $default,) {final _that = this;
 switch (_that) {
 case _BlogModel() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);case _:
+return $default(_that.id,_that.title,_that.shortDescription,_that.description,_that.imageUrl,_that.categoryId,_that.authorId,_that.createdAt,_that.voteCount,_that.isLiked,_that.isSaved,_that.author);case _:
   return null;
 
 }
@@ -222,11 +223,12 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.cate
 @JsonSerializable()
 
 class _BlogModel extends BlogModel {
-  const _BlogModel({this.id = 0, this.title = '', this.description = '', @JsonKey(name: 'image_url') this.imageUrl = '', @JsonKey(name: 'category_id') this.categoryId = '', @JsonKey(name: 'author_id') this.authorId = '', @JsonKey(name: 'created_at') this.createdAt = '', @JsonKey(name: 'vote_count') this.voteCount = 0, @JsonKey(name: 'is_voted') this.isLiked = false, @JsonKey(name: 'is_saved') this.isSaved = false, this.author = const ProfileModel()}): super._();
+  const _BlogModel({this.id = 0, this.title = '', @JsonKey(name: 'short_description') this.shortDescription = '', this.description = '', @JsonKey(name: 'image_url') this.imageUrl = '', @JsonKey(name: 'category_id') this.categoryId = '', @JsonKey(name: 'author_id') this.authorId = '', @JsonKey(name: 'created_at') this.createdAt = '', @JsonKey(name: 'vote_count') this.voteCount = 0, @JsonKey(name: 'is_voted') this.isLiked = false, @JsonKey(name: 'is_saved') this.isSaved = false, this.author = const ProfileModel()}): super._();
   factory _BlogModel.fromJson(Map<String, dynamic> json) => _$BlogModelFromJson(json);
 
 @override@JsonKey() final  int id;
 @override@JsonKey() final  String title;
+@override@JsonKey(name: 'short_description') final  String shortDescription;
 @override@JsonKey() final  String description;
 @override@JsonKey(name: 'image_url') final  String imageUrl;
 @override@JsonKey(name: 'category_id') final  String categoryId;
@@ -250,16 +252,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.shortDescription, shortDescription) || other.shortDescription == shortDescription)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
+int get hashCode => Object.hash(runtimeType,id,title,shortDescription,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
 
 @override
 String toString() {
-  return 'BlogModel(id: $id, title: $title, description: $description, imageUrl: $imageUrl, categoryId: $categoryId, authorId: $authorId, createdAt: $createdAt, voteCount: $voteCount, isLiked: $isLiked, isSaved: $isSaved, author: $author)';
+  return 'BlogModel(id: $id, title: $title, shortDescription: $shortDescription, description: $description, imageUrl: $imageUrl, categoryId: $categoryId, authorId: $authorId, createdAt: $createdAt, voteCount: $voteCount, isLiked: $isLiked, isSaved: $isSaved, author: $author)';
 }
 
 
@@ -270,7 +272,7 @@ abstract mixin class _$BlogModelCopyWith<$Res> implements $BlogModelCopyWith<$Re
   factory _$BlogModelCopyWith(_BlogModel value, $Res Function(_BlogModel) _then) = __$BlogModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String title, String description,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'category_id') String categoryId,@JsonKey(name: 'author_id') String authorId,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'vote_count') int voteCount,@JsonKey(name: 'is_voted') bool isLiked,@JsonKey(name: 'is_saved') bool isSaved, ProfileModel author
+ int id, String title,@JsonKey(name: 'short_description') String shortDescription, String description,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'category_id') String categoryId,@JsonKey(name: 'author_id') String authorId,@JsonKey(name: 'created_at') String createdAt,@JsonKey(name: 'vote_count') int voteCount,@JsonKey(name: 'is_voted') bool isLiked,@JsonKey(name: 'is_saved') bool isSaved, ProfileModel author
 });
 
 
@@ -287,10 +289,11 @@ class __$BlogModelCopyWithImpl<$Res>
 
 /// Create a copy of BlogModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? imageUrl = null,Object? categoryId = null,Object? authorId = null,Object? createdAt = null,Object? voteCount = null,Object? isLiked = null,Object? isSaved = null,Object? author = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? shortDescription = null,Object? description = null,Object? imageUrl = null,Object? categoryId = null,Object? authorId = null,Object? createdAt = null,Object? voteCount = null,Object? isLiked = null,Object? isSaved = null,Object? author = null,}) {
   return _then(_BlogModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,shortDescription: null == shortDescription ? _self.shortDescription : shortDescription // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable

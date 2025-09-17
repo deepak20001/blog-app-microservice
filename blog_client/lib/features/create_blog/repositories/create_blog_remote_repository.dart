@@ -24,8 +24,25 @@ abstract interface class CreateBlogRemoteRepository {
   Future<Either<Failure, String>> createBlog({
     required String imagePath,
     required String title,
+    required String shortDescription,
     required String description,
     required int categoryId,
+  });
+
+  // Generate ai title
+  Future<Either<Failure, String>> generateAiTitle({required String title});
+
+  // Generate ai short description
+  Future<Either<Failure, String>> generateAiShortDescription({
+    required String title,
+    required String shortDescription,
+  });
+
+  // Generate ai description
+  Future<Either<Failure, String>> generateAiDescription({
+    required String title,
+    required String shortDescription,
+    required String description,
   });
 }
 
@@ -142,6 +159,7 @@ class BlogsRemoteRepositoryImpl implements CreateBlogRemoteRepository {
   Future<Either<Failure, String>> createBlog({
     required String imagePath,
     required String title,
+    required String shortDescription,
     required String description,
     required int categoryId,
   }) async {
@@ -152,6 +170,7 @@ class BlogsRemoteRepositoryImpl implements CreateBlogRemoteRepository {
           data: {
             'image': imagePath,
             'title': title,
+            'short_description': shortDescription,
             'description': description,
             'category_id': categoryId,
           },
@@ -170,6 +189,99 @@ class BlogsRemoteRepositoryImpl implements CreateBlogRemoteRepository {
           return Failure(error.message);
         }
         return Failure('Create blog failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> generateAiTitle({
+    required String title,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.generateAiTitle,
+          data: {'title': title},
+        );
+
+        final data = response.data!;
+        return data['data'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Generate ai title error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Generate ai title failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> generateAiShortDescription({
+    required String title,
+    required String shortDescription,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.generateAiShortDescription,
+          data: {'title': title, 'short_description': shortDescription},
+        );
+
+        final data = response.data!;
+        return data['data'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Generate ai short description error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure(
+          'Generate ai short description failed. Please try again.',
+        );
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> generateAiDescription({
+    required String title,
+    required String shortDescription,
+    required String description,
+  }) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.generateAiDescription,
+          data: {
+            'title': title,
+            'short_description': shortDescription,
+            'description': description,
+          },
+        );
+
+        final data = response.data!;
+        return data['data'] as String;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Generate ai description error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Generate ai description failed. Please try again.');
       },
     ).run();
   }

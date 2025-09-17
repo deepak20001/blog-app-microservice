@@ -4,6 +4,7 @@ import type { AuthenticatedRequest } from "../middleware/isAuth.js";
 import { success, z } from "zod";
 import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
+import { GoogleGenAI } from "@google/genai";
 
 // Validation schemas
 const createCategorySchema = z.object({
@@ -19,6 +20,9 @@ const createBlogSchema = z.object({
     description: z.string().
         min(3, "Description must be at least 3 characters long").
         max(10000, "Description must not exceed 10000 characters"),
+    short_description:  z.string().
+    min(3, "Description must be at least 3 characters long").
+    max(255, "Short description must not exceed 500 characters"),
     image: z.string(),
     category_id: z.number(),
 });
@@ -121,7 +125,7 @@ export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
         }
         
         const authorId = payloadData._id;
-        const {title, description, image, category_id: categoryId} = req.body;
+        const {title, description, image, category_id: categoryId, short_description: shortDescription} = req.body;
 
         const categoryRecord = await sql`
             SELECT * FROM categories WHERE id = ${categoryId}
@@ -153,8 +157,8 @@ export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
         } 
 
         const result = await sql`
-            INSERT INTO blogs (title, description, image_url, category_id, author_id) 
-            VALUES (${title}, ${description}, ${image}, ${categoryId}, ${authorId})
+            INSERT INTO blogs (title, description, image_url, category_id, author_id, short_description) 
+            VALUES (${title}, ${description}, ${image}, ${categoryId}, ${authorId}, ${shortDescription})
             RETURNING *
         `;
 
@@ -881,7 +885,6 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 is_saved: savedMap.has(String(blog.id)), 
             });
         })
-        console.log(updatedResponse)
         return res.status(200).json({
             success: true,
             data: updatedResponse,
@@ -918,7 +921,6 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
             SELECT * FROM savedblogs
             WHERE user_id = ${payloadData._id}
         `;
-        console.log(mysavedBlogs);
         const savedBlogsIds = mysavedBlogs.map(v => parseInt(v.blog_id));
         
         const page = parseInt(req.query.page as string) || 1;
@@ -1046,7 +1048,6 @@ export const userBlogsCount = async(req: AuthenticatedRequest, res: Response) =>
             SELECT COUNT(*)::int FROM blogs
             WHERE author_id = ${userId}
         `;
-        console.log(countUserBlogs)
         
         if (!countUserBlogs || countUserBlogs.length === 0) {
             return res.status(500).json({
@@ -1067,3 +1068,213 @@ export const userBlogsCount = async(req: AuthenticatedRequest, res: Response) =>
         });
     }
 }
+
+export const generateAiTitle = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { title } = req.body;
+        if (!title || title.toString().length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Please provide valid text",
+            });
+        }
+    
+        const prompt = `Generate a concise and engaging blog title under 200 characters. 
+        The title should be grammatically correct, attention-grabbing, and relevant to the blog topic. 
+        Return only the title without extra symbols or explanation: "${title}"`;
+    
+        const ai = new GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY as string,
+        });
+    
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+    
+        const rawtext = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!rawtext) {
+            return res.status(400).json({
+            success: false,
+            error: "Something went wrong",
+            });
+        }
+    
+        const result = rawtext
+            .replace(/\*\*/g, "")
+            .replace(/[\r\n]+/g, "")
+            .replace(/[*_`~]/g, "")
+            .trim();
+    
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+        } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+};
+export const generateAiShortDescription = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { title, shortDescription, description } = req.body;
+    
+        if (
+            (!title || title.trim().length === 0) &&
+            (!description || description.trim().length === 0) &&
+            (!shortDescription || shortDescription.trim().length === 0)
+        ) {
+            return res.status(400).json({
+            success: false,
+            error: "Please provide at least a title, description, or short description.",
+            });
+        }
+    
+        let baseText = "";
+        if (title) baseText += `Title: "${title}"\n`;
+        if (description) baseText += `Description: "${description}"\n`;
+        if (shortDescription) baseText += `Existing Short Description: "${shortDescription}"\n`;
+    
+        const prompt = `Improve or generate a concise and engaging short blog description under 255 characters. 
+        It should be grammatically correct, attention-grabbing, and relevant to the blog topic. 
+        If an existing short description is provided, refine it to be better. 
+        Return only the description without extra symbols or explanation. 
+        Here is the content:\n${baseText}`;
+    
+        const ai = new GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY as string,
+        });
+    
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+    
+        const rawtext = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!rawtext) {
+            return res.status(400).json({
+            success: false,
+            error: "Something went wrong",
+            });
+        }
+    
+        let result = rawtext
+            .replace(/\*\*/g, "")
+            .replace(/[\r\n]+/g, " ")
+            .replace(/[*_`~]/g, "")
+            .trim();
+    
+        if (result.length > 255) {
+            result = result.slice(0, 252) + "...";
+        }
+    
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+        } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+};
+
+export const generateAiDescription = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { title, shortDescription, description } = req.body;
+    
+        if (!title && !shortDescription && !description) {
+            return res.status(400).json({
+            success: false,
+            error: "Please provide at least a title, shortDescription, or description.",
+            });
+        }
+    
+        let context = "You are a content writer. Return only valid HTML (like <p>, <h2>, <ul>, <li>, etc.), under 9000 characters, without extra text or symbols.\n\nIMPORTANT: Generate HTML that is compatible with Flutter's HTML rendering engine. Avoid these problematic CSS properties:\n- font-feature-settings\n- font-variant-caps\n- font-stretch\n- font-size-adjust\n- font-kerning\n- font-variant-alternates\n- font-variant-ligatures\n- font-variant-numeric\n- font-variant-east-asian\n- font-variant-position\n- font-variant-emoji\n- font-optical-sizing\n- font-variation-settings\n- -webkit-text-stroke-width\n- -webkit-text-stroke-color\n\nUse only basic HTML tags and simple inline styles. Avoid complex CSS properties that can cause rendering issues in Flutter.\n\n";
+        if (title) {
+            context += `Title: ${title}\n`;
+        }
+        if (shortDescription) {
+            context += `Short Description: ${shortDescription}\n`;
+        }
+        if (description) {
+            context += `Existing Description: ${description}\n\nRefine and optimize this description using the title and short description if provided. Remove any problematic CSS properties and ensure Flutter compatibility.`;
+        } else {
+            context += `Generate a fresh blog description using the above details. Use only basic HTML tags and avoid complex CSS styling.`;
+        }
+    
+        const ai = new GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY as string,
+        });
+    
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: context }] }],
+        });
+    
+        const rawtext =
+            response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+        if (!rawtext) {
+            return res.status(400).json({
+            success: false,
+            error: "AI returned an empty response.",
+            });
+        }
+    
+        let htmlResult = rawtext
+            .replace(/^```html\s*/i, "")
+            .replace(/```$/i, "")
+            .trim();
+        
+
+        const problematicProperties = [
+            'font-feature-settings',
+            'font-variant-caps',
+            'font-stretch',
+            'font-size-adjust',
+            'font-kerning',
+            'font-variant-alternates',
+            'font-variant-ligatures',
+            'font-variant-numeric',
+            'font-variant-east-asian',
+            'font-variant-position',
+            'font-variant-emoji',
+            'font-optical-sizing',
+            'font-variation-settings',
+            '-webkit-text-stroke-width',
+            '-webkit-text-stroke-color'
+        ];
+        
+
+        for (const property of problematicProperties) {
+            const regex = new RegExp(`${property}\\s*:\\s*[^;]+;?`, 'gi');
+            htmlResult = htmlResult.replace(regex, '');
+        }
+        
+
+        htmlResult = htmlResult
+            .replace(/;;/g, ';')
+            .replace(/;\s*$/, '')
+            .replace(/^\s*;/, '');
+        
+
+        htmlResult = htmlResult.replace(/\s*style\s*=\s*["']\s*["']/gi, '');
+    
+        return res.status(200).json({
+            success: true,
+            data: htmlResult,
+        });
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+    });
+    }
+};

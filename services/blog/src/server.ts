@@ -30,6 +30,7 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS blogs(
             id SERIAL PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
+            short_description VARCHAR(255) NOT NULL,
             description TEXT NOT NULL,
             image_url VARCHAR(255) NOT NULL,
             category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,

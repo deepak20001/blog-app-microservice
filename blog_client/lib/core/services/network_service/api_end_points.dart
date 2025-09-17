@@ -60,4 +60,11 @@ class ApiEndpoints {
   static String get followProfile => '$userServiceBaseUrl/relationships/follow';
   static String get unfollowProfile =>
       '$userServiceBaseUrl/relationships/unfollow';
+
+  // AI Service Endpoints
+  static String get generateAiTitle => '$blogServiceBaseUrl/blogs/ai-title';
+  static String get generateAiShortDescription =>
+      '$blogServiceBaseUrl/blogs/ai-short-desc';
+  static String get generateAiDescription =>
+      '$blogServiceBaseUrl/blogs/ai-desc';
 }
