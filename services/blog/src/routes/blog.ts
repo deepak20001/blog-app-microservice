@@ -14,6 +14,7 @@ import {
     unupvoteBlog, 
     updateBlog, 
     upvoteBlog,
+    userBlogsCount,
     } from "../controllers/blog.js";
 
 const router = express();
@@ -34,6 +35,7 @@ router.delete("/unupvote-blog", isAuth, unupvoteBlog);
 router.post("/", isAuth, createBlog);
 router.get("/filter", isAuth, getBlogs);
 router.get("/my-blogs", isAuth, myBlogs);
+router.get("/user-blogs-count/:id", isAuth, userBlogsCount);
 router.get("/saved-blogs", isAuth, savedBlogs);
 router.get("/:id", isAuth, getBlogById);
 router.patch("/:id", isAuth, updateBlog);

@@ -8,11 +8,13 @@ export interface IRelationship extends Document {
 const schema: Schema<IRelationship> = new Schema({
     followerId: {
         type: Schema.Types.ObjectId,
-        required: true,
+        required: true, 
+        ref: "User",
     },
     followingId: {
         type: Schema.Types.ObjectId,
         required: true,
+        ref: "User",
     },
 },
 {

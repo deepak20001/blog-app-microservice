@@ -8,7 +8,7 @@ part of 'profile_model.dart';
 
 _ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) =>
     _ProfileModel(
-      id: json['id'] as String? ?? '',
+      id: json['_id'] as String? ?? '',
       username: json['username'] as String? ?? 'Anonymous',
       email: json['email'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
@@ -19,11 +19,13 @@ _ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updatedAt'] as String? ?? '',
       followersCount: (json['followersCount'] as num?)?.toInt() ?? 0,
       followingsCount: (json['followingsCount'] as num?)?.toInt() ?? 0,
+      userPostedBlogsCount:
+          (json['userPostedBlogsCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$ProfileModelToJson(_ProfileModel instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      '_id': instance.id,
       'username': instance.username,
       'email': instance.email,
       'bio': instance.bio,
@@ -34,4 +36,5 @@ Map<String, dynamic> _$ProfileModelToJson(_ProfileModel instance) =>
       'updatedAt': instance.updatedAt,
       'followersCount': instance.followersCount,
       'followingsCount': instance.followingsCount,
+      'userPostedBlogsCount': instance.userPostedBlogsCount,
     };

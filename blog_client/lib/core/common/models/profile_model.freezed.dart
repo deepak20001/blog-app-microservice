@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProfileModel {
 
- String get id; String get username; String get email; String get bio; String get avatar; String get role; bool get isVerified; String get createdAt; String get updatedAt; int get followersCount; int get followingsCount;
+@JsonKey(name: '_id') String get id; String get username; String get email; String get bio; String get avatar; String get role; bool get isVerified; String get createdAt; String get updatedAt; int get followersCount; int get followingsCount; int get userPostedBlogsCount;
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProfileModelCopyWith<ProfileModel> get copyWith => _$ProfileModelCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingsCount, followingsCount) || other.followingsCount == followingsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingsCount, followingsCount) || other.followingsCount == followingsCount)&&(identical(other.userPostedBlogsCount, userPostedBlogsCount) || other.userPostedBlogsCount == userPostedBlogsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,email,bio,avatar,role,isVerified,createdAt,updatedAt,followersCount,followingsCount);
+int get hashCode => Object.hash(runtimeType,id,username,email,bio,avatar,role,isVerified,createdAt,updatedAt,followersCount,followingsCount,userPostedBlogsCount);
 
 @override
 String toString() {
-  return 'ProfileModel(id: $id, username: $username, email: $email, bio: $bio, avatar: $avatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingsCount: $followingsCount)';
+  return 'ProfileModel(id: $id, username: $username, email: $email, bio: $bio, avatar: $avatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingsCount: $followingsCount, userPostedBlogsCount: $userPostedBlogsCount)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProfileModelCopyWith<$Res>  {
   factory $ProfileModelCopyWith(ProfileModel value, $Res Function(ProfileModel) _then) = _$ProfileModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String username, String email, String bio, String avatar, String role, bool isVerified, String createdAt, String updatedAt, int followersCount, int followingsCount
+@JsonKey(name: '_id') String id, String username, String email, String bio, String avatar, String role, bool isVerified, String createdAt, String updatedAt, int followersCount, int followingsCount, int userPostedBlogsCount
 });
 
 
@@ -65,7 +65,7 @@ class _$ProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? email = null,Object? bio = null,Object? avatar = null,Object? role = null,Object? isVerified = null,Object? createdAt = null,Object? updatedAt = null,Object? followersCount = null,Object? followingsCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? email = null,Object? bio = null,Object? avatar = null,Object? role = null,Object? isVerified = null,Object? createdAt = null,Object? updatedAt = null,Object? followersCount = null,Object? followingsCount = null,Object? userPostedBlogsCount = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -78,6 +78,7 @@ as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: ca
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as String,followersCount: null == followersCount ? _self.followersCount : followersCount // ignore: cast_nullable_to_non_nullable
 as int,followingsCount: null == followingsCount ? _self.followingsCount : followingsCount // ignore: cast_nullable_to_non_nullable
+as int,userPostedBlogsCount: null == userPostedBlogsCount ? _self.userPostedBlogsCount : userPostedBlogsCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount,  int userPostedBlogsCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileModel() when $default != null:
-return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount);case _:
+return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount,_that.userPostedBlogsCount);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount,  int userPostedBlogsCount)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileModel():
-return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount);}
+return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount,_that.userPostedBlogsCount);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -198,10 +199,10 @@ return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String id,  String username,  String email,  String bio,  String avatar,  String role,  bool isVerified,  String createdAt,  String updatedAt,  int followersCount,  int followingsCount,  int userPostedBlogsCount)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileModel() when $default != null:
-return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount);case _:
+return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingsCount,_that.userPostedBlogsCount);case _:
   return null;
 
 }
@@ -213,10 +214,10 @@ return $default(_that.id,_that.username,_that.email,_that.bio,_that.avatar,_that
 @JsonSerializable()
 
 class _ProfileModel extends ProfileModel {
-  const _ProfileModel({this.id = '', this.username = 'Anonymous', this.email = '', this.bio = '', this.avatar = '', this.role = '', this.isVerified = false, this.createdAt = '', this.updatedAt = '', this.followersCount = 0, this.followingsCount = 0}): super._();
+  const _ProfileModel({@JsonKey(name: '_id') this.id = '', this.username = 'Anonymous', this.email = '', this.bio = '', this.avatar = '', this.role = '', this.isVerified = false, this.createdAt = '', this.updatedAt = '', this.followersCount = 0, this.followingsCount = 0, this.userPostedBlogsCount = 0}): super._();
   factory _ProfileModel.fromJson(Map<String, dynamic> json) => _$ProfileModelFromJson(json);
 
-@override@JsonKey() final  String id;
+@override@JsonKey(name: '_id') final  String id;
 @override@JsonKey() final  String username;
 @override@JsonKey() final  String email;
 @override@JsonKey() final  String bio;
@@ -227,6 +228,7 @@ class _ProfileModel extends ProfileModel {
 @override@JsonKey() final  String updatedAt;
 @override@JsonKey() final  int followersCount;
 @override@JsonKey() final  int followingsCount;
+@override@JsonKey() final  int userPostedBlogsCount;
 
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingsCount, followingsCount) || other.followingsCount == followingsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingsCount, followingsCount) || other.followingsCount == followingsCount)&&(identical(other.userPostedBlogsCount, userPostedBlogsCount) || other.userPostedBlogsCount == userPostedBlogsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,email,bio,avatar,role,isVerified,createdAt,updatedAt,followersCount,followingsCount);
+int get hashCode => Object.hash(runtimeType,id,username,email,bio,avatar,role,isVerified,createdAt,updatedAt,followersCount,followingsCount,userPostedBlogsCount);
 
 @override
 String toString() {
-  return 'ProfileModel(id: $id, username: $username, email: $email, bio: $bio, avatar: $avatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingsCount: $followingsCount)';
+  return 'ProfileModel(id: $id, username: $username, email: $email, bio: $bio, avatar: $avatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingsCount: $followingsCount, userPostedBlogsCount: $userPostedBlogsCount)';
 }
 
 
@@ -261,7 +263,7 @@ abstract mixin class _$ProfileModelCopyWith<$Res> implements $ProfileModelCopyWi
   factory _$ProfileModelCopyWith(_ProfileModel value, $Res Function(_ProfileModel) _then) = __$ProfileModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String username, String email, String bio, String avatar, String role, bool isVerified, String createdAt, String updatedAt, int followersCount, int followingsCount
+@JsonKey(name: '_id') String id, String username, String email, String bio, String avatar, String role, bool isVerified, String createdAt, String updatedAt, int followersCount, int followingsCount, int userPostedBlogsCount
 });
 
 
@@ -278,7 +280,7 @@ class __$ProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of ProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? email = null,Object? bio = null,Object? avatar = null,Object? role = null,Object? isVerified = null,Object? createdAt = null,Object? updatedAt = null,Object? followersCount = null,Object? followingsCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? email = null,Object? bio = null,Object? avatar = null,Object? role = null,Object? isVerified = null,Object? createdAt = null,Object? updatedAt = null,Object? followersCount = null,Object? followingsCount = null,Object? userPostedBlogsCount = null,}) {
   return _then(_ProfileModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -291,6 +293,7 @@ as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: ca
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as String,followersCount: null == followersCount ? _self.followersCount : followersCount // ignore: cast_nullable_to_non_nullable
 as int,followingsCount: null == followingsCount ? _self.followingsCount : followingsCount // ignore: cast_nullable_to_non_nullable
+as int,userPostedBlogsCount: null == userPostedBlogsCount ? _self.userPostedBlogsCount : userPostedBlogsCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

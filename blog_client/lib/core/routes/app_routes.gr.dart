@@ -9,27 +9,31 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i8;
-import 'package:blog_client/features/auth/view/pages/login_page.dart' as _i5;
-import 'package:blog_client/features/auth/view/pages/signup_page.dart' as _i7;
+import 'package:auto_route/auto_route.dart' as _i10;
+import 'package:blog_client/features/auth/view/pages/login_page.dart' as _i7;
+import 'package:blog_client/features/auth/view/pages/signup_page.dart' as _i9;
 import 'package:blog_client/features/blog_details/view/pages/blog_details_page.dart'
     as _i1;
 import 'package:blog_client/features/blogs/view/pages/blogs_page.dart' as _i2;
 import 'package:blog_client/features/create_blog/view/pages/create_blog_page.dart'
     as _i3;
+import 'package:blog_client/features/followers_followings/view/pages/followers_page.dart'
+    as _i5;
+import 'package:blog_client/features/followers_followings/view/pages/followings_page.dart'
+    as _i6;
 import 'package:blog_client/features/profile/view/pages/edit_profile_page.dart'
     as _i4;
 import 'package:blog_client/features/profile/view/pages/profile_page.dart'
-    as _i6;
-import 'package:flutter/material.dart' as _i9;
+    as _i8;
+import 'package:flutter/material.dart' as _i11;
 
 /// generated route for
 /// [_i1.BlogDetailsPage]
-class BlogDetailsRoute extends _i8.PageRouteInfo<BlogDetailsRouteArgs> {
+class BlogDetailsRoute extends _i10.PageRouteInfo<BlogDetailsRouteArgs> {
   BlogDetailsRoute({
-    _i9.Key? key,
+    _i11.Key? key,
     required int blogId,
-    List<_i8.PageRouteInfo>? children,
+    List<_i10.PageRouteInfo>? children,
   }) : super(
          BlogDetailsRoute.name,
          args: BlogDetailsRouteArgs(key: key, blogId: blogId),
@@ -38,7 +42,7 @@ class BlogDetailsRoute extends _i8.PageRouteInfo<BlogDetailsRouteArgs> {
 
   static const String name = 'BlogDetailsRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<BlogDetailsRouteArgs>();
@@ -50,7 +54,7 @@ class BlogDetailsRoute extends _i8.PageRouteInfo<BlogDetailsRouteArgs> {
 class BlogDetailsRouteArgs {
   const BlogDetailsRouteArgs({this.key, required this.blogId});
 
-  final _i9.Key? key;
+  final _i11.Key? key;
 
   final int blogId;
 
@@ -72,13 +76,13 @@ class BlogDetailsRouteArgs {
 
 /// generated route for
 /// [_i2.BlogsPage]
-class BlogsRoute extends _i8.PageRouteInfo<void> {
-  const BlogsRoute({List<_i8.PageRouteInfo>? children})
+class BlogsRoute extends _i10.PageRouteInfo<void> {
+  const BlogsRoute({List<_i10.PageRouteInfo>? children})
     : super(BlogsRoute.name, initialChildren: children);
 
   static const String name = 'BlogsRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
       return const _i2.BlogsPage();
@@ -88,13 +92,13 @@ class BlogsRoute extends _i8.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.CreateBlogPage]
-class CreateBlogRoute extends _i8.PageRouteInfo<void> {
-  const CreateBlogRoute({List<_i8.PageRouteInfo>? children})
+class CreateBlogRoute extends _i10.PageRouteInfo<void> {
+  const CreateBlogRoute({List<_i10.PageRouteInfo>? children})
     : super(CreateBlogRoute.name, initialChildren: children);
 
   static const String name = 'CreateBlogRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
       return const _i3.CreateBlogPage();
@@ -104,13 +108,13 @@ class CreateBlogRoute extends _i8.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EditProfilePage]
-class EditProfileRoute extends _i8.PageRouteInfo<void> {
-  const EditProfileRoute({List<_i8.PageRouteInfo>? children})
+class EditProfileRoute extends _i10.PageRouteInfo<void> {
+  const EditProfileRoute({List<_i10.PageRouteInfo>? children})
     : super(EditProfileRoute.name, initialChildren: children);
 
   static const String name = 'EditProfileRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
       return const _i4.EditProfilePage();
@@ -119,49 +123,174 @@ class EditProfileRoute extends _i8.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i5.LoginPage]
-class LoginRoute extends _i8.PageRouteInfo<void> {
-  const LoginRoute({List<_i8.PageRouteInfo>? children})
+/// [_i5.FollowersPage]
+class FollowersRoute extends _i10.PageRouteInfo<FollowersRouteArgs> {
+  FollowersRoute({
+    _i11.Key? key,
+    required String userId,
+    List<_i10.PageRouteInfo>? children,
+  }) : super(
+         FollowersRoute.name,
+         args: FollowersRouteArgs(key: key, userId: userId),
+         initialChildren: children,
+       );
+
+  static const String name = 'FollowersRoute';
+
+  static _i10.PageInfo page = _i10.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FollowersRouteArgs>();
+      return _i5.FollowersPage(key: args.key, userId: args.userId);
+    },
+  );
+}
+
+class FollowersRouteArgs {
+  const FollowersRouteArgs({this.key, required this.userId});
+
+  final _i11.Key? key;
+
+  final String userId;
+
+  @override
+  String toString() {
+    return 'FollowersRouteArgs{key: $key, userId: $userId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FollowersRouteArgs) return false;
+    return key == other.key && userId == other.userId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ userId.hashCode;
+}
+
+/// generated route for
+/// [_i6.FollowingsPage]
+class FollowingsRoute extends _i10.PageRouteInfo<FollowingsRouteArgs> {
+  FollowingsRoute({
+    _i11.Key? key,
+    required String userId,
+    List<_i10.PageRouteInfo>? children,
+  }) : super(
+         FollowingsRoute.name,
+         args: FollowingsRouteArgs(key: key, userId: userId),
+         initialChildren: children,
+       );
+
+  static const String name = 'FollowingsRoute';
+
+  static _i10.PageInfo page = _i10.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FollowingsRouteArgs>();
+      return _i6.FollowingsPage(key: args.key, userId: args.userId);
+    },
+  );
+}
+
+class FollowingsRouteArgs {
+  const FollowingsRouteArgs({this.key, required this.userId});
+
+  final _i11.Key? key;
+
+  final String userId;
+
+  @override
+  String toString() {
+    return 'FollowingsRouteArgs{key: $key, userId: $userId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FollowingsRouteArgs) return false;
+    return key == other.key && userId == other.userId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ userId.hashCode;
+}
+
+/// generated route for
+/// [_i7.LoginPage]
+class LoginRoute extends _i10.PageRouteInfo<void> {
+  const LoginRoute({List<_i10.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      return const _i5.LoginPage();
+      return const _i7.LoginPage();
     },
   );
 }
 
 /// generated route for
-/// [_i6.ProfilePage]
-class ProfileRoute extends _i8.PageRouteInfo<void> {
-  const ProfileRoute({List<_i8.PageRouteInfo>? children})
-    : super(ProfileRoute.name, initialChildren: children);
+/// [_i8.ProfilePage]
+class ProfileRoute extends _i10.PageRouteInfo<ProfileRouteArgs> {
+  ProfileRoute({
+    _i11.Key? key,
+    required String id,
+    List<_i10.PageRouteInfo>? children,
+  }) : super(
+         ProfileRoute.name,
+         args: ProfileRouteArgs(key: key, id: id),
+         initialChildren: children,
+       );
 
   static const String name = 'ProfileRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      return const _i6.ProfilePage();
+      final args = data.argsAs<ProfileRouteArgs>();
+      return _i8.ProfilePage(key: args.key, id: args.id);
     },
   );
 }
 
+class ProfileRouteArgs {
+  const ProfileRouteArgs({this.key, required this.id});
+
+  final _i11.Key? key;
+
+  final String id;
+
+  @override
+  String toString() {
+    return 'ProfileRouteArgs{key: $key, id: $id}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ProfileRouteArgs) return false;
+    return key == other.key && id == other.id;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ id.hashCode;
+}
+
 /// generated route for
-/// [_i7.SignupPage]
-class SignupRoute extends _i8.PageRouteInfo<void> {
-  const SignupRoute({List<_i8.PageRouteInfo>? children})
+/// [_i9.SignupPage]
+class SignupRoute extends _i10.PageRouteInfo<void> {
+  const SignupRoute({List<_i10.PageRouteInfo>? children})
     : super(SignupRoute.name, initialChildren: children);
 
   static const String name = 'SignupRoute';
 
-  static _i8.PageInfo page = _i8.PageInfo(
+  static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      return const _i7.SignupPage();
+      return const _i9.SignupPage();
     },
   );
 }

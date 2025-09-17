@@ -25,22 +25,22 @@ class BuildBlogCard extends StatelessWidget {
 
   // Save blog
   void _onSaveBlog(BuildContext context) {
-    blogsBloc.add(SaveBlogEvent(blogId: blog.id));
+    blogsBloc.add(BlogsSaveBlogEvent(blogId: blog.id));
   }
 
   // Unsave blog
   void _onUnsaveBlog(BuildContext context) {
-    blogsBloc.add(UnsaveBlogEvent(blogId: blog.id));
+    blogsBloc.add(BlogsUnsaveBlogEvent(blogId: blog.id));
   }
 
   // Upvote blog
   void _onUpvoteBlog(BuildContext context) {
-    blogsBloc.add(UpvoteBlogEvent(blogId: blog.id));
+    blogsBloc.add(BlogsUpvoteBlogEvent(blogId: blog.id));
   }
 
   // Unupvote blog
   void _onUnupvoteBlog(BuildContext context) {
-    blogsBloc.add(UnupvoteBlogEvent(blogId: blog.id));
+    blogsBloc.add(BlogsUnupvoteBlogEvent(blogId: blog.id));
   }
 
   @override

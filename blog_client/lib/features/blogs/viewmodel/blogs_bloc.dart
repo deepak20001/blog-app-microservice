@@ -15,11 +15,11 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     : _blogsRemoteRepository = blogsRemoteRepository,
       super(const BlogsInitialState()) {
     on<BlogsFetchEvent>(_onBlogsFetchRequested);
-    on<CategoriesFetchEvent>(_onCategoriesFetchRequested);
-    on<SaveBlogEvent>(_onSaveBlogRequested);
-    on<UnsaveBlogEvent>(_onUnsaveBlogRequested);
-    on<UpvoteBlogEvent>(_onUpvoteBlogRequested);
-    on<UnupvoteBlogEvent>(_onUnupvoteBlogRequested);
+    on<BlogsCategoriesFetchEvent>(_onCategoriesFetchRequested);
+    on<BlogsSaveBlogEvent>(_onSaveBlogRequested);
+    on<BlogsUnsaveBlogEvent>(_onUnsaveBlogRequested);
+    on<BlogsUpvoteBlogEvent>(_onUpvoteBlogRequested);
+    on<BlogsUnupvoteBlogEvent>(_onUnupvoteBlogRequested);
   }
   final BlogsRemoteRepository _blogsRemoteRepository;
   final int _page = 1;
@@ -27,7 +27,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   // Handle categories fetch
   Future<void> _onCategoriesFetchRequested(
-    CategoriesFetchEvent event,
+    BlogsCategoriesFetchEvent event,
     Emitter<BlogsState> emit,
   ) async {
     emit(
@@ -138,7 +138,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   /// Handle save blog
   Future<void> _onSaveBlogRequested(
-    SaveBlogEvent event,
+    BlogsSaveBlogEvent event,
     Emitter<BlogsState> emit,
   ) async {
     final updatedBlogs = state.blogs.map((blog) {
@@ -194,7 +194,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   /// Handle unsave blog
   Future<void> _onUnsaveBlogRequested(
-    UnsaveBlogEvent event,
+    BlogsUnsaveBlogEvent event,
     Emitter<BlogsState> emit,
   ) async {
     final updatedBlogs = state.blogs.map((blog) {
@@ -252,7 +252,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   /// Handle upvote blog
   Future<void> _onUpvoteBlogRequested(
-    UpvoteBlogEvent event,
+    BlogsUpvoteBlogEvent event,
     Emitter<BlogsState> emit,
   ) async {
     final updatedBlogs = state.blogs.map((blog) {
@@ -310,7 +310,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
 
   /// Handle unupvote blog
   Future<void> _onUnupvoteBlogRequested(
-    UnupvoteBlogEvent event,
+    BlogsUnupvoteBlogEvent event,
     Emitter<BlogsState> emit,
   ) async {
     final updatedBlogs = state.blogs.map((blog) {

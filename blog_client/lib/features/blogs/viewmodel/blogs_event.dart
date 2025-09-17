@@ -8,8 +8,8 @@ abstract class BlogsEvent extends Equatable {
 }
 
 // Categories Fetch Event
-class CategoriesFetchEvent extends BlogsEvent {
-  const CategoriesFetchEvent();
+class BlogsCategoriesFetchEvent extends BlogsEvent {
+  const BlogsCategoriesFetchEvent();
 
   @override
   List<Object?> get props => [];
@@ -26,8 +26,8 @@ class BlogsFetchEvent extends BlogsEvent {
 }
 
 // Save Blog Event
-class SaveBlogEvent extends BlogsEvent {
-  const SaveBlogEvent({required this.blogId});
+class BlogsSaveBlogEvent extends BlogsEvent {
+  const BlogsSaveBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -35,8 +35,8 @@ class SaveBlogEvent extends BlogsEvent {
 }
 
 // Unsave Blog Event
-class UnsaveBlogEvent extends BlogsEvent {
-  const UnsaveBlogEvent({required this.blogId});
+class BlogsUnsaveBlogEvent extends BlogsEvent {
+  const BlogsUnsaveBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -44,8 +44,8 @@ class UnsaveBlogEvent extends BlogsEvent {
 }
 
 // Upvote Blog Event
-class UpvoteBlogEvent extends BlogsEvent {
-  const UpvoteBlogEvent({required this.blogId});
+class BlogsUpvoteBlogEvent extends BlogsEvent {
+  const BlogsUpvoteBlogEvent({required this.blogId});
   final int blogId;
 
   @override
@@ -53,8 +53,8 @@ class UpvoteBlogEvent extends BlogsEvent {
 }
 
 // Unupvote Blog Event
-class UnupvoteBlogEvent extends BlogsEvent {
-  const UnupvoteBlogEvent({required this.blogId});
+class BlogsUnupvoteBlogEvent extends BlogsEvent {
+  const BlogsUnupvoteBlogEvent({required this.blogId});
   final int blogId;
 
   @override

@@ -1,3 +1,4 @@
+import 'package:blog_client/core/common/enums/api_state_enums.dart';
 import 'package:blog_client/core/common/extensions/date_time_extensions.dart';
 import 'package:blog_client/core/common/extensions/padding_extensions.dart';
 import 'package:blog_client/core/common/extensions/size_extensions.dart';
@@ -21,14 +22,44 @@ class BuildBlogsSection extends StatelessWidget {
   final Size size;
   final ProfileBloc profileBloc;
 
+  // Save blog
+  void _onSaveBlog(int blogId) {
+    profileBloc.add(ProfileSaveBlogEvent(blogId: blogId));
+  }
+
+  // Unsave blog
+  void _onUnsaveBlog(int blogId) {
+    profileBloc.add(ProfileUnsaveBlogEvent(blogId: blogId));
+  }
+
+  // Upvote blog
+  void _onUpvoteBlog(int blogId) {
+    profileBloc.add(ProfileUpvoteBlogEvent(blogId: blogId));
+  }
+
+  // Unupvote blog
+  void _onUnupvoteBlog(int blogId) {
+    profileBloc.add(ProfileUnupvoteBlogEvent(blogId: blogId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
+      buildWhen: (previous, current) =>
+          previous.blogs != current.blogs ||
+          current is ProfileGetMyBlogsLoadingState ||
+          current is ProfileGetMyBlogsFailureState ||
+          current is ProfileGetMyBlogsSuccessState ||
+          current is ProfileGetSavedBlogsLoadingState ||
+          current is ProfileGetSavedBlogsFailureState ||
+          current is ProfileGetSavedBlogsSuccessState,
       bloc: profileBloc,
       builder: (context, state) {
-        if (state is ProfileGetMyBlogsLoadingState ||
-            state is ProfileGetSavedBlogsLoadingState) {
+        if (state.blogsApiState == ApiStateEnums.loading) {
           return Loader(color: AppPallete.primaryColor);
+        }
+        if (state.blogs.isEmpty) {
+          return _buildEmptyBlogsState(context);
         }
         return ListView.builder(
           padding: EdgeInsets.all(size.width * numD035),
@@ -139,9 +170,9 @@ class BuildBlogsSection extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 IconButton(
-                                  onPressed: () {
-                                    // TODO: Implement save functionality
-                                  },
+                                  onPressed: () => blog.isSaved
+                                      ? _onUnsaveBlog(blog.id)
+                                      : _onSaveBlog(blog.id),
                                   icon: Icon(
                                     blog.isSaved
                                         ? Icons.bookmark
@@ -158,9 +189,9 @@ class BuildBlogsSection extends StatelessWidget {
                                     size.width * numD08,
                                   ),
                                   child: GestureDetector(
-                                    onTap: () {
-                                      // TODO: Implement like functionality
-                                    },
+                                    onTap: () => blog.isLiked
+                                        ? _onUnupvoteBlog(blog.id)
+                                        : _onUpvoteBlog(blog.id),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: AppPallete.cardBackground,
@@ -216,6 +247,47 @@ class BuildBlogsSection extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildEmptyBlogsState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(size.width * numD06),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: size.width * numD03,
+          children: [
+            Container(
+              padding: EdgeInsets.all(size.width * numD04),
+              decoration: BoxDecoration(
+                color: AppPallete.primaryColor.withValues(alpha: numD05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.article_outlined,
+                color: AppPallete.primaryColor,
+                size: size.width * numD1,
+              ),
+            ),
+            CommonText(
+              text: 'No blogs found',
+              style: context.titleMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppPallete.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            CommonText(
+              text: 'You don\'t have any blogs here yet.',
+              style: context.bodyMedium.copyWith(
+                color: AppPallete.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

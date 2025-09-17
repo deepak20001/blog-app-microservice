@@ -28,6 +28,10 @@ import 'package:blog_client/features/create_blog/repositories/create_blog_remote
     as _i1021;
 import 'package:blog_client/features/create_blog/viewmodel/create_blog_bloc.dart'
     as _i535;
+import 'package:blog_client/features/followers_followings/repositories/followers_followings_remote_repository.dart'
+    as _i919;
+import 'package:blog_client/features/followers_followings/viewmodel/follow_followings_bloc.dart'
+    as _i848;
 import 'package:blog_client/features/profile/repositories/profile_remote_repository.dart'
     as _i391;
 import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart'
@@ -82,6 +86,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i509.AuthRemoteRepository>(
       () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
+    gh.lazySingleton<_i919.FollowersFollowingsRemoteRepository>(
+      () => _i919.FollowersFollowingsRemoteRepositoryImpl(
+        dioClient: gh<_i647.DioClient>(),
+      ),
+    );
     gh.lazySingleton<_i658.BlogsRemoteRepository>(
       () => _i658.BlogsRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
@@ -106,6 +115,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i535.CreateBlogBloc>(
       () => _i535.CreateBlogBloc(
         createBlogRemoteRepository: gh<_i1021.CreateBlogRemoteRepository>(),
+      ),
+    );
+    gh.singleton<_i848.FollowFollowingsBloc>(
+      () => _i848.FollowFollowingsBloc(
+        followersFollowingsRemoteRepository:
+            gh<_i919.FollowersFollowingsRemoteRepository>(),
       ),
     );
     gh.singleton<_i942.BlogsBloc>(

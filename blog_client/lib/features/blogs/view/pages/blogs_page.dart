@@ -32,7 +32,7 @@ class _BlogsPageState extends State<BlogsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _blogsBloc.add(const CategoriesFetchEvent());
+      _blogsBloc.add(const BlogsCategoriesFetchEvent());
       _blogsBloc.add(BlogsFetchEvent(categoryId: 0, search: ''));
     });
   }
@@ -116,7 +116,7 @@ class _BlogsPageState extends State<BlogsPage> {
             actions: [
               IconButton(
                 onPressed: () {
-                  context.router.push(const ProfileRoute());
+                  context.router.push( ProfileRoute( id: ''));
                 },
                 icon: Icon(Icons.person, color: AppPallete.primaryColor),
               ),

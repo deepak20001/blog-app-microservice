@@ -8,6 +8,8 @@ import getBuffer from "../utils/data_uri.js";
 import {v2 as cloudinary} from "cloudinary";
 import bcrypt from "bcrypt";
 import Relationship from "../model/relationship.js";
+import axios from "axios";
+import { getTokenFromHeader } from "../utils/get_token.js";
 
 // Validation schemas
 const registerSchema = z.object({
@@ -169,7 +171,7 @@ export const login = async(req: Request, res: Response) => {
     }
 }
 
-export const getUserProfile = async(req: Request, res: Response) => {
+export const getUserProfile = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const {id} = req.params;
 
@@ -187,12 +189,33 @@ export const getUserProfile = async(req: Request, res: Response) => {
             });
         }
 
-        const followingsRecordCount = await Relationship.find({
+        const followersRecordCount = await Relationship.find({
             followingId: id,
         }).countDocuments();
-        const followersRecordCount = await Relationship.find({
+        const followingsRecordCount = await Relationship.find({
             followerId: id,
         }).countDocuments();
+
+        const token = getTokenFromHeader(req);
+        if (!token) {
+                return res.status(401).json({
+                success: false,
+                error: "Invalid token",
+            });
+        }
+
+        const userPostedBlogsCount = await axios.get(`${process.env.BLOG_SERVICE_URL}/api/v1/blogs/user-blogs-count/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        if(!userPostedBlogsCount) {
+            return res.status(400).json({
+                success: false,
+                error: "Error fetching blogs count",
+            });
+        }
+
 
         return res.status(200).json({
             success: true,
@@ -206,6 +229,7 @@ export const getUserProfile = async(req: Request, res: Response) => {
                 isVerified: userRecord.isVerified,
                 followersCount: followersRecordCount,
                 followingsCount: followingsRecordCount,
+                userPostedBlogsCount: userPostedBlogsCount.data.data,
             },
         });
     } catch (error: any) {
@@ -317,6 +341,59 @@ export const updateUser = async(req: AuthenticatedRequest, res: Response) => {
         return res.status(200).json({
             success: true,
             data: updatedUserRecord,
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const getProfileStats = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        // get blogs count
+        const {id: userId} = req.params;
+        if(!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid user ID",
+            });
+        }
+
+        const token = getTokenFromHeader(req);
+        if (!token) {
+                return res.status(401).json({
+                success: false,
+                error: "Invalid token",
+            });
+        }
+        const userPostedBlogsCount = await axios.get(`${process.env.BLOG_SERVICE_URL}/api/v1/blogs/user-blogs-count/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        if(!userPostedBlogsCount) {
+            return res.status(400).json({
+                success: false,
+                error: "Error fetching blogs count",
+            });
+        }
+
+        // get followers count
+        const followingsRecordCount = await Relationship.find({
+            followingId: userId,
+        }).countDocuments();
+        // get followings count
+        const followersRecordCount = await Relationship.find({
+            followerId: userId,
+        }).countDocuments();
+
+        return res.json({
+            blogsPostedCount: userPostedBlogsCount.data.data,
+            followersCount: followersRecordCount,
+            followingsCount: followingsRecordCount,
         });
     } catch (error: any) {
         console.log(error);

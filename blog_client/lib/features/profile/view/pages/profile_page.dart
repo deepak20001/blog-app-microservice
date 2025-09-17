@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:blog_client/core/common/enums/api_state_enums.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
+import 'package:blog_client/core/common/widgets/loader.dart';
 import 'package:blog_client/core/constants/constants.dart';
 import 'package:blog_client/core/routes/app_routes.gr.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
@@ -16,7 +18,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, required this.id});
+  final String id;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -32,6 +35,7 @@ class _ProfilePageState extends State<ProfilePage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _profileBloc.add(ProfileGetUserProfileEvent(id: widget.id));
       _onTabSelected(0);
     });
   }
@@ -87,31 +91,43 @@ class _ProfilePageState extends State<ProfilePage>
             ),
           ],
         ),
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverToBoxAdapter(
-              child: Column(
-                spacing: size.width * numD02,
-                children: [
-                  BuildProfileHeader(size: size, profileBloc: _profileBloc),
-                  BuildProfileStats(size: size),
-                  BuildProfileTabs(
-                    tabController: _tabController,
-                    size: size,
-                    onTabSelected: _onTabSelected,
+        body: BlocBuilder<ProfileBloc, ProfileState>(
+          bloc: _profileBloc,
+          buildWhen: (previous, current) =>
+              current is ProfileGetUserProfileLoadingState ||
+              current is ProfileGetUserProfileSuccessState ||
+              current is ProfileGetUserProfileFailureState,
+          builder: (context, state) {
+            if (state.profileApiState == ApiStateEnums.loading) {
+              return Loader(color: AppPallete.primaryColor);
+            }
+            return NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                SliverToBoxAdapter(
+                  child: Column(
+                    spacing: size.width * numD02,
+                    children: [
+                      BuildProfileHeader(size: size, profileBloc: _profileBloc),
+                      BuildProfileStats(size: size, profileBloc: _profileBloc),
+                      BuildProfileTabs(
+                        tabController: _tabController,
+                        size: size,
+                        onTabSelected: _onTabSelected,
+                      ),
+                    ],
                   ),
+                ),
+              ],
+              body: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  BuildBlogsSection(size: size, profileBloc: _profileBloc),
+                  BuildBlogsSection(size: size, profileBloc: _profileBloc),
                 ],
               ),
-            ),
-          ],
-          body: TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              BuildBlogsSection(size: size, profileBloc: _profileBloc),
-              BuildBlogsSection(size: size, profileBloc: _profileBloc),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

@@ -11,6 +11,7 @@ part of 'blog_model.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$BlogModel {
 
@@ -21,6 +22,8 @@ mixin _$BlogModel {
 @pragma('vm:prefer-inline')
 $BlogModelCopyWith<BlogModel> get copyWith => _$BlogModelCopyWithImpl<BlogModel>(this as BlogModel, _$identity);
 
+  /// Serializes this BlogModel to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -28,7 +31,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
 
@@ -216,11 +219,11 @@ return $default(_that.id,_that.title,_that.description,_that.imageUrl,_that.cate
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _BlogModel extends BlogModel {
   const _BlogModel({this.id = 0, this.title = '', this.description = '', @JsonKey(name: 'image_url') this.imageUrl = '', @JsonKey(name: 'category_id') this.categoryId = '', @JsonKey(name: 'author_id') this.authorId = '', @JsonKey(name: 'created_at') this.createdAt = '', @JsonKey(name: 'vote_count') this.voteCount = 0, @JsonKey(name: 'is_voted') this.isLiked = false, @JsonKey(name: 'is_saved') this.isSaved = false, this.author = const ProfileModel()}): super._();
-  
+  factory _BlogModel.fromJson(Map<String, dynamic> json) => _$BlogModelFromJson(json);
 
 @override@JsonKey() final  int id;
 @override@JsonKey() final  String title;
@@ -240,14 +243,17 @@ class _BlogModel extends BlogModel {
 @pragma('vm:prefer-inline')
 _$BlogModelCopyWith<_BlogModel> get copyWith => __$BlogModelCopyWithImpl<_BlogModel>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$BlogModelToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _BlogModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.voteCount, voteCount) || other.voteCount == voteCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.isSaved, isSaved) || other.isSaved == isSaved)&&(identical(other.author, author) || other.author == author));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,title,description,imageUrl,categoryId,authorId,createdAt,voteCount,isLiked,isSaved,author);
 

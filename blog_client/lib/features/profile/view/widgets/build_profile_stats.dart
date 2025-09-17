@@ -1,14 +1,21 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:blog_client/core/common/extensions/size_extensions.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
 import 'package:blog_client/core/constants/constants.dart';
+import 'package:blog_client/core/routes/app_routes.gr.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
+import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart';
 import 'package:flutter/material.dart';
 
 class BuildProfileStats extends StatelessWidget {
-  const BuildProfileStats({super.key, required this.size});
-
+  const BuildProfileStats({
+    super.key,
+    required this.size,
+    required this.profileBloc,
+  });
   final Size size;
+  final ProfileBloc profileBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +40,8 @@ class BuildProfileStats extends StatelessWidget {
             child: _buildStatItem(
               context: context,
               title: 'Blogs',
-              count: '24',
+              count: profileBloc.state.profileData.userPostedBlogsCount
+                  .toString(),
               icon: Icons.article_outlined,
             ),
           ),
@@ -46,11 +54,18 @@ class BuildProfileStats extends StatelessWidget {
 
           // Followers Count
           Expanded(
-            child: _buildStatItem(
-              context: context,
-              title: 'Followers',
-              count: '1.2K',
-              icon: Icons.people_outline,
+            child: GestureDetector(
+              onTap: () {
+                context.router.push(
+                  FollowersRoute(userId: profileBloc.state.profileData.id),
+                );
+              },
+              child: _buildStatItem(
+                context: context,
+                title: 'Followers',
+                count: profileBloc.state.profileData.followersCount.toString(),
+                icon: Icons.people_outline,
+              ),
             ),
           ),
 
@@ -62,11 +77,18 @@ class BuildProfileStats extends StatelessWidget {
 
           // Following Count
           Expanded(
-            child: _buildStatItem(
-              context: context,
-              title: 'Following',
-              count: '456',
-              icon: Icons.person_add_outlined,
+            child: GestureDetector(
+              onTap: () {
+                context.router.push(
+                  FollowingsRoute(userId: profileBloc.state.profileData.id),
+                );
+              },
+              child: _buildStatItem(
+                context: context,
+                title: 'Following',
+                count: profileBloc.state.profileData.followingsCount.toString(),
+                icon: Icons.person_add_outlined,
+              ),
             ),
           ),
         ],

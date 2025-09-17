@@ -12,7 +12,10 @@ class ApiEndpoints {
   /// User Service Endpoints
   static String get login => '$userServiceBaseUrl/users/login';
   static String get register => '$userServiceBaseUrl/users/register';
-  static String get profile => '$userServiceBaseUrl/users/profile';
+  static String profile({required String id}) =>
+      '$userServiceBaseUrl/users/$id';
+  static String profileStats({required String id}) =>
+      '$userServiceBaseUrl/users/profile-stats/$id';
   static String get logout => '$userServiceBaseUrl/users/logout';
 
   // Categories
@@ -48,4 +51,13 @@ class ApiEndpoints {
   static String get createComment => '$blogServiceBaseUrl/comments';
   static String get upvoteComment => '$blogServiceBaseUrl/comments/upvote';
   static String get unupvoteComment => '$blogServiceBaseUrl/comments/unupvote';
+
+  /// Followers Followings Service Endpoints
+  static String getFollowers({required String id}) =>
+      '$userServiceBaseUrl/relationships/followers/$id';
+  static String getFollowings({required String id}) =>
+      '$userServiceBaseUrl/relationships/followings/$id';
+  static String get followProfile => '$userServiceBaseUrl/relationships/follow';
+  static String get unfollowProfile =>
+      '$userServiceBaseUrl/relationships/unfollow';
 }

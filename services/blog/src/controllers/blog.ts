@@ -1038,3 +1038,32 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
         });
     }
 }
+
+export const userBlogsCount = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const {id: userId} = req.params;
+        const countUserBlogs = await sql`
+            SELECT COUNT(*)::int FROM blogs
+            WHERE author_id = ${userId}
+        `;
+        console.log(countUserBlogs)
+        
+        if (!countUserBlogs || countUserBlogs.length === 0) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching blogs count",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: countUserBlogs[0]?.count ?? 0,
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}

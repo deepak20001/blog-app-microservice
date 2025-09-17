@@ -6,7 +6,7 @@ part 'profile_model.g.dart';
 @freezed
 sealed class ProfileModel with _$ProfileModel {
   const factory ProfileModel({
-    @Default('') String id,
+    @JsonKey(name: '_id') @Default('') String id,
     @Default('Anonymous') String username,
     @Default('') String email,
     @Default('') String bio,
@@ -17,6 +17,7 @@ sealed class ProfileModel with _$ProfileModel {
     @Default('') String updatedAt,
     @Default(0) int followersCount,
     @Default(0) int followingsCount,
+    @Default(0) int userPostedBlogsCount, 
   }) = _ProfileModel;
   const ProfileModel._();
 

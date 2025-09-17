@@ -17,6 +17,8 @@ class BuildProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profileData = profileBloc.state.profileData;
+
     return Column(
       spacing: size.width * numD01,
       children: [
@@ -29,7 +31,7 @@ class BuildProfileHeader extends StatelessWidget {
           ),
           child: ClipOval(
             child: CommonCachedImage(
-              imageUrl: profileBloc.userProfileImage,
+              imageUrl: profileData.avatar,
               width: size.width * numD25,
               height: size.width * numD25,
               fit: BoxFit.cover,
@@ -37,14 +39,14 @@ class BuildProfileHeader extends StatelessWidget {
           ),
         ),
         CommonText(
-          text: profileBloc.userName,
+          text: profileData.username,
           style: context.headlineSmall.copyWith(
             fontWeight: FontWeight.w700,
             color: AppPallete.textPrimary,
           ),
         ),
         CommonText(
-          text: profileBloc.userBio,
+          text: profileData.bio,
           style: context.bodyMedium.copyWith(color: AppPallete.textSecondary),
           textAlign: TextAlign.center,
           maxLines: 3,
