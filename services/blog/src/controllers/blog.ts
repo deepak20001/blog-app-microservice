@@ -926,8 +926,6 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
         const offset = (page - 1) * limit;
-        const totalItems = mysavedBlogs.length;
-        const totalPages = Math.ceil(totalItems/limit);
 
         const result = await sql`
             SELECT * FROM blogs 
@@ -947,11 +945,7 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
                 data: [],
                 pagination: {
                     current_page: page,
-                    total_pages: totalPages,
-                    total_items: totalItems,
                     items_per_page: limit,
-                    has_next: page < totalPages,
-                    has_prev: page > 1,
                 },
             });
         } 
@@ -1025,11 +1019,7 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
             data: updatedResult,
             pagination: {
                 current_page: page,
-                total_pages: totalPages,
-                total_items: totalItems,
                 items_per_page: limit,
-                has_next: page < totalPages,
-                has_prev: page > 1,
             },
         });
     } catch (error: any) {

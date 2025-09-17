@@ -13,4 +13,7 @@ class AppRoutesName {
   static const String editProfile = '/edit-profile';
   static const String followers = '/followers';
   static const String followings = '/followings';
+
+  // search
+  static const String search = '/search';
 }

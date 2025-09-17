@@ -9,9 +9,9 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i10;
+import 'package:auto_route/auto_route.dart' as _i11;
 import 'package:blog_client/features/auth/view/pages/login_page.dart' as _i7;
-import 'package:blog_client/features/auth/view/pages/signup_page.dart' as _i9;
+import 'package:blog_client/features/auth/view/pages/signup_page.dart' as _i10;
 import 'package:blog_client/features/blog_details/view/pages/blog_details_page.dart'
     as _i1;
 import 'package:blog_client/features/blogs/view/pages/blogs_page.dart' as _i2;
@@ -25,15 +25,16 @@ import 'package:blog_client/features/profile/view/pages/edit_profile_page.dart'
     as _i4;
 import 'package:blog_client/features/profile/view/pages/profile_page.dart'
     as _i8;
-import 'package:flutter/material.dart' as _i11;
+import 'package:blog_client/features/search/view/pages/search_page.dart' as _i9;
+import 'package:flutter/material.dart' as _i12;
 
 /// generated route for
 /// [_i1.BlogDetailsPage]
-class BlogDetailsRoute extends _i10.PageRouteInfo<BlogDetailsRouteArgs> {
+class BlogDetailsRoute extends _i11.PageRouteInfo<BlogDetailsRouteArgs> {
   BlogDetailsRoute({
-    _i11.Key? key,
+    _i12.Key? key,
     required int blogId,
-    List<_i10.PageRouteInfo>? children,
+    List<_i11.PageRouteInfo>? children,
   }) : super(
          BlogDetailsRoute.name,
          args: BlogDetailsRouteArgs(key: key, blogId: blogId),
@@ -42,7 +43,7 @@ class BlogDetailsRoute extends _i10.PageRouteInfo<BlogDetailsRouteArgs> {
 
   static const String name = 'BlogDetailsRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<BlogDetailsRouteArgs>();
@@ -54,7 +55,7 @@ class BlogDetailsRoute extends _i10.PageRouteInfo<BlogDetailsRouteArgs> {
 class BlogDetailsRouteArgs {
   const BlogDetailsRouteArgs({this.key, required this.blogId});
 
-  final _i11.Key? key;
+  final _i12.Key? key;
 
   final int blogId;
 
@@ -76,13 +77,13 @@ class BlogDetailsRouteArgs {
 
 /// generated route for
 /// [_i2.BlogsPage]
-class BlogsRoute extends _i10.PageRouteInfo<void> {
-  const BlogsRoute({List<_i10.PageRouteInfo>? children})
+class BlogsRoute extends _i11.PageRouteInfo<void> {
+  const BlogsRoute({List<_i11.PageRouteInfo>? children})
     : super(BlogsRoute.name, initialChildren: children);
 
   static const String name = 'BlogsRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       return const _i2.BlogsPage();
@@ -92,13 +93,13 @@ class BlogsRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.CreateBlogPage]
-class CreateBlogRoute extends _i10.PageRouteInfo<void> {
-  const CreateBlogRoute({List<_i10.PageRouteInfo>? children})
+class CreateBlogRoute extends _i11.PageRouteInfo<void> {
+  const CreateBlogRoute({List<_i11.PageRouteInfo>? children})
     : super(CreateBlogRoute.name, initialChildren: children);
 
   static const String name = 'CreateBlogRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       return const _i3.CreateBlogPage();
@@ -108,13 +109,13 @@ class CreateBlogRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.EditProfilePage]
-class EditProfileRoute extends _i10.PageRouteInfo<void> {
-  const EditProfileRoute({List<_i10.PageRouteInfo>? children})
+class EditProfileRoute extends _i11.PageRouteInfo<void> {
+  const EditProfileRoute({List<_i11.PageRouteInfo>? children})
     : super(EditProfileRoute.name, initialChildren: children);
 
   static const String name = 'EditProfileRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       return const _i4.EditProfilePage();
@@ -124,11 +125,11 @@ class EditProfileRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.FollowersPage]
-class FollowersRoute extends _i10.PageRouteInfo<FollowersRouteArgs> {
+class FollowersRoute extends _i11.PageRouteInfo<FollowersRouteArgs> {
   FollowersRoute({
-    _i11.Key? key,
+    _i12.Key? key,
     required String userId,
-    List<_i10.PageRouteInfo>? children,
+    List<_i11.PageRouteInfo>? children,
   }) : super(
          FollowersRoute.name,
          args: FollowersRouteArgs(key: key, userId: userId),
@@ -137,7 +138,7 @@ class FollowersRoute extends _i10.PageRouteInfo<FollowersRouteArgs> {
 
   static const String name = 'FollowersRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<FollowersRouteArgs>();
@@ -149,7 +150,7 @@ class FollowersRoute extends _i10.PageRouteInfo<FollowersRouteArgs> {
 class FollowersRouteArgs {
   const FollowersRouteArgs({this.key, required this.userId});
 
-  final _i11.Key? key;
+  final _i12.Key? key;
 
   final String userId;
 
@@ -171,11 +172,11 @@ class FollowersRouteArgs {
 
 /// generated route for
 /// [_i6.FollowingsPage]
-class FollowingsRoute extends _i10.PageRouteInfo<FollowingsRouteArgs> {
+class FollowingsRoute extends _i11.PageRouteInfo<FollowingsRouteArgs> {
   FollowingsRoute({
-    _i11.Key? key,
+    _i12.Key? key,
     required String userId,
-    List<_i10.PageRouteInfo>? children,
+    List<_i11.PageRouteInfo>? children,
   }) : super(
          FollowingsRoute.name,
          args: FollowingsRouteArgs(key: key, userId: userId),
@@ -184,7 +185,7 @@ class FollowingsRoute extends _i10.PageRouteInfo<FollowingsRouteArgs> {
 
   static const String name = 'FollowingsRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<FollowingsRouteArgs>();
@@ -196,7 +197,7 @@ class FollowingsRoute extends _i10.PageRouteInfo<FollowingsRouteArgs> {
 class FollowingsRouteArgs {
   const FollowingsRouteArgs({this.key, required this.userId});
 
-  final _i11.Key? key;
+  final _i12.Key? key;
 
   final String userId;
 
@@ -218,13 +219,13 @@ class FollowingsRouteArgs {
 
 /// generated route for
 /// [_i7.LoginPage]
-class LoginRoute extends _i10.PageRouteInfo<void> {
-  const LoginRoute({List<_i10.PageRouteInfo>? children})
+class LoginRoute extends _i11.PageRouteInfo<void> {
+  const LoginRoute({List<_i11.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       return const _i7.LoginPage();
@@ -234,11 +235,11 @@ class LoginRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.ProfilePage]
-class ProfileRoute extends _i10.PageRouteInfo<ProfileRouteArgs> {
+class ProfileRoute extends _i11.PageRouteInfo<ProfileRouteArgs> {
   ProfileRoute({
-    _i11.Key? key,
+    _i12.Key? key,
     required String id,
-    List<_i10.PageRouteInfo>? children,
+    List<_i11.PageRouteInfo>? children,
   }) : super(
          ProfileRoute.name,
          args: ProfileRouteArgs(key: key, id: id),
@@ -247,7 +248,7 @@ class ProfileRoute extends _i10.PageRouteInfo<ProfileRouteArgs> {
 
   static const String name = 'ProfileRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ProfileRouteArgs>();
@@ -259,7 +260,7 @@ class ProfileRoute extends _i10.PageRouteInfo<ProfileRouteArgs> {
 class ProfileRouteArgs {
   const ProfileRouteArgs({this.key, required this.id});
 
-  final _i11.Key? key;
+  final _i12.Key? key;
 
   final String id;
 
@@ -280,17 +281,33 @@ class ProfileRouteArgs {
 }
 
 /// generated route for
-/// [_i9.SignupPage]
-class SignupRoute extends _i10.PageRouteInfo<void> {
-  const SignupRoute({List<_i10.PageRouteInfo>? children})
+/// [_i9.SearchPage]
+class SearchRoute extends _i11.PageRouteInfo<void> {
+  const SearchRoute({List<_i11.PageRouteInfo>? children})
+    : super(SearchRoute.name, initialChildren: children);
+
+  static const String name = 'SearchRoute';
+
+  static _i11.PageInfo page = _i11.PageInfo(
+    name,
+    builder: (data) {
+      return const _i9.SearchPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i10.SignupPage]
+class SignupRoute extends _i11.PageRouteInfo<void> {
+  const SignupRoute({List<_i11.PageRouteInfo>? children})
     : super(SignupRoute.name, initialChildren: children);
 
   static const String name = 'SignupRoute';
 
-  static _i10.PageInfo page = _i10.PageInfo(
+  static _i11.PageInfo page = _i11.PageInfo(
     name,
     builder: (data) {
-      return const _i9.SignupPage();
+      return const _i10.SignupPage();
     },
   );
 }

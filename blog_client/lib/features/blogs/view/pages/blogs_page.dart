@@ -116,7 +116,13 @@ class _BlogsPageState extends State<BlogsPage> {
             actions: [
               IconButton(
                 onPressed: () {
-                  context.router.push( ProfileRoute( id: ''));
+                  context.router.push(SearchRoute());
+                },
+                icon: Icon(Icons.search, color: AppPallete.primaryColor),
+              ),
+              IconButton(
+                onPressed: () {
+                  context.router.push(ProfileRoute(id: ''));
                 },
                 icon: Icon(Icons.person, color: AppPallete.primaryColor),
               ),

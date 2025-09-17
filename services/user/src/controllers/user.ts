@@ -403,3 +403,60 @@ export const getProfileStats = async(req: AuthenticatedRequest, res: Response) =
         });
     }
 }
+
+export const searchUsers = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Authenticated user",
+            });
+        }
+        
+        const { search } = req.query;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+
+        let searchQuery: any = {
+            _id: { $ne: payloadData._id }
+        };
+        if (search && typeof search === 'string' && search.trim().length > 0) {
+            searchQuery = {
+                _id: { $ne: payloadData._id },
+                $or: [
+                    { username: { $regex: search.trim(), $options: 'i' } },
+                    { email: { $regex: search.trim(), $options: 'i' } },
+                ]
+            };
+        }
+        const usersResult = await User.find(searchQuery)
+            .select('-password')
+            .skip(offset)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        if (!usersResult) {
+            return res.status(500).json({
+                success: false,
+                error: "Error fetching users",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: usersResult,
+            pagination: {
+                page,
+                limit,
+            },
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}

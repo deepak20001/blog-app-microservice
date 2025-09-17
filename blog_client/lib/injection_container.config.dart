@@ -36,6 +36,10 @@ import 'package:blog_client/features/profile/repositories/profile_remote_reposit
     as _i391;
 import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart'
     as _i886;
+import 'package:blog_client/features/search/repositories/search_remote_repository.dart'
+    as _i498;
+import 'package:blog_client/features/search/viewmodel/search_bloc.dart'
+    as _i454;
 import 'package:blog_client/injection_container.dart' as _i634;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
@@ -83,6 +87,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i391.ProfileRemoteRepository>(
       () => _i391.ProfileRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
+    gh.lazySingleton<_i498.SearchRemoteRepository>(
+      () => _i498.SearchRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
+    );
     gh.lazySingleton<_i509.AuthRemoteRepository>(
       () => _i509.AuthRemoteRepositoryImpl(dioClient: gh<_i647.DioClient>()),
     );
@@ -121,6 +128,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i848.FollowFollowingsBloc(
         followersFollowingsRemoteRepository:
             gh<_i919.FollowersFollowingsRemoteRepository>(),
+      ),
+    );
+    gh.singleton<_i454.SearchBloc>(
+      () => _i454.SearchBloc(
+        searchRemoteRepository: gh<_i498.SearchRemoteRepository>(),
       ),
     );
     gh.singleton<_i942.BlogsBloc>(

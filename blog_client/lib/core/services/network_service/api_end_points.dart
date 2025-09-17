@@ -67,4 +67,11 @@ class ApiEndpoints {
       '$blogServiceBaseUrl/blogs/ai-short-desc';
   static String get generateAiDescription =>
       '$blogServiceBaseUrl/blogs/ai-desc';
+
+  // Search Service Endpoints
+  static String searchUsers({
+    required String search,
+    required int page,
+    required int limit,
+  }) => '$userServiceBaseUrl/users?search=$search&page=$page&limit=$limit';
 }

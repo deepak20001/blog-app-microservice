@@ -1,5 +1,5 @@
 import express from "express";
-import { getProfileStats, getUserProfile, getUsersProfile, login, register, updateAvatar, updateUser } from "../controllers/user.js";
+import { getProfileStats, getUserProfile, getUsersProfile, login, register, searchUsers, updateAvatar, updateUser } from "../controllers/user.js";
 import { isAuth } from "../middleware/isAuth.js";
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.get("/users/profile-stats/:id", isAuth, getProfileStats);
 router.get("/users/:id", isAuth, getUserProfile);
 router.patch("/users", isAuth, updateUser);
 router.patch("/users/avatar", isAuth,  updateAvatar);
+router.get("/users", isAuth, searchUsers);
 
 
 export default router;
