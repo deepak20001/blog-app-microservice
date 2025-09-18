@@ -18,6 +18,7 @@ class BuildImagePickSection extends StatelessWidget {
   final Size size;
   final CreateBlogBloc createBlogBloc;
 
+  // Pick Image
   void _onPickImage() {
     createBlogBloc.add(CreateBlogPickImageEvent());
   }

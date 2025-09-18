@@ -20,6 +20,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }) : _profileRemoteRepository = profileRemoteRepository,
        _storageRepository = storageRepository,
        super(const ProfileInitialState()) {
+    on<ProfileGetUpdatedDataFromLocalStorageEvent>(
+      _onGetUpdatedDataFromLocalStorageRequested,
+    );
     on<ProfileGetUserProfileEvent>(_onGetUserProfileRequested);
     on<ProfileGetMyBlogsEvent>(_onGetMyBlogsRequested);
     on<ProfileGetSavedBlogsEvent>(_onGetSavedBlogsRequested);
@@ -37,6 +40,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   String get userProfileImage => _storageRepository.userProfileImage;
   String get userName => _storageRepository.userName;
   String get userBio => _storageRepository.userBio;
+
+  // Handle get updated data from local storage
+  Future<void> _onGetUpdatedDataFromLocalStorageRequested(
+    ProfileGetUpdatedDataFromLocalStorageEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    _storageRepository.userProfileImage = userProfileImage;
+    _storageRepository.userName = userName;
+    _storageRepository.userBio = userBio;
+
+    final updatedProfileData = state.profileData.copyWith(
+      avatar: userProfileImage,
+      username: userName,
+      bio: userBio,
+    );
+
+    emit(
+      ProfileGetUserProfileSuccessState(
+        blogs: state.blogs,
+        blogsApiState: state.blogsApiState,
+        profileData: updatedProfileData,
+      ),
+    );
+  }
 
   /// Handle get user profile request
   Future<void> _onGetUserProfileRequested(

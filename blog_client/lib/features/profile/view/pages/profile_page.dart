@@ -85,7 +85,11 @@ class _ProfilePageState extends State<ProfilePage>
           actions: [
             IconButton(
               onPressed: () {
-                context.router.push(const EditProfileRoute());
+                context.router.push(const EditProfileRoute()).then((_) {
+                  _profileBloc.add(
+                    const ProfileGetUpdatedDataFromLocalStorageEvent(),
+                  );
+                });
               },
               icon: Icon(Icons.edit, color: AppPallete.primaryColor),
             ),

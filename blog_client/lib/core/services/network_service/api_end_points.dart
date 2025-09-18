@@ -17,6 +17,8 @@ class ApiEndpoints {
   static String profileStats({required String id}) =>
       '$userServiceBaseUrl/users/profile-stats/$id';
   static String get logout => '$userServiceBaseUrl/users/logout';
+  static String get updateProfile => '$userServiceBaseUrl/users';
+  static String get updateAvatar => '$userServiceBaseUrl/users/avatar';
 
   // Categories
   static String get categories => '$blogServiceBaseUrl/blogs/categories';
@@ -44,6 +46,7 @@ class ApiEndpoints {
 
   /// Media Service Endpoints
   static String get uploadBlogImage => '$mediaServiceBaseUrl/media/blog-image';
+  static String get uploadAvatar => '$mediaServiceBaseUrl/media/avatar-upload';
 
   /// Comment Service Endpoints
   static String fetchComments({required int blogId}) =>

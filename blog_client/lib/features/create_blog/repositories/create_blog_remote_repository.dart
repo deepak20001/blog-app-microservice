@@ -73,7 +73,7 @@ class BlogsRemoteRepositoryImpl implements CreateBlogRemoteRepository {
 
         final file = File(image.path);
         final fileSize = file.lengthSync();
-        if (fileSize > 5 * 1024 * 1024) {
+        if (fileSize > fileSize) {
           throw Exception('Image size is too large');
         }
 

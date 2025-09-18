@@ -134,6 +134,13 @@ coverage/
 .pub/
 /build/
 
+# Auto-generated files
+**/*.g.dart
+**/*.freezed.dart
+**/*.gr.dart
+**/injection_container.config.dart
+**/app_routes.gr.dart
+
 # Symbolication related
 app.*.symbols
 

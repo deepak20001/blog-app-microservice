@@ -277,8 +277,8 @@ export const updateAvatar = async(req: AuthenticatedRequest, res: Response) => {
             });
         }
 
-        const {uploadedUrl} = req.body;
-        if(!uploadedUrl) {
+        const {avatar} = req.body;
+        if(!avatar) {
             return res.status(400).json({
                 success: false,
                 error: "Uploaded url not found",
@@ -294,7 +294,7 @@ export const updateAvatar = async(req: AuthenticatedRequest, res: Response) => {
         }
         await User.updateOne(
             {_id: payloadData._id},
-            { avatar: uploadedUrl}
+            { avatar }
         );
 
         return res.status(200).json({
@@ -340,6 +340,7 @@ export const updateUser = async(req: AuthenticatedRequest, res: Response) => {
 
         return res.status(200).json({
             success: true,
+            message: "User updated successfully",
             data: updatedUserRecord,
         });
     } catch (error: any) {

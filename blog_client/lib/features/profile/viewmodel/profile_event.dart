@@ -76,3 +76,11 @@ class ProfileUnupvoteBlogEvent extends ProfileEvent {
   @override
   List<Object?> get props => [blogId];
 }
+
+// Get updated data from local storage
+class ProfileGetUpdatedDataFromLocalStorageEvent extends ProfileEvent {
+  const ProfileGetUpdatedDataFromLocalStorageEvent();
+
+  @override
+  List<Object?> get props => [];
+}
