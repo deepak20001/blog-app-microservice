@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:blog_client/core/common/enums/verify_otp_purpose_enums.dart';
 import 'package:blog_client/core/common/extensions/padding_extensions.dart';
 import 'package:blog_client/core/common/extensions/size_extensions.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
@@ -42,9 +43,16 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onBlocListener(BuildContext context, AuthState state) {
     switch (state) {
-      case AuthLoginSuccessState(:final successMessage):
+      case AuthLoginSuccessState(:final successMessage, :final user):
         SnackbarUtils.showSuccess(context: context, message: successMessage);
-        context.router.replace(const BlogsRoute());
+        (user.isVerified)
+            ? context.router.replace(const BlogsRoute())
+            : context.router.push(
+                VerifyOtpRoute(
+                  email: _emailController.text.trim(),
+                  purpose: VerifyOtpPurposeEnums.emailVerification,
+                ),
+              );
         break;
       case AuthLoginFailureState(:final errorMessage):
         SnackbarUtils.showError(context: context, message: errorMessage);
@@ -102,7 +110,8 @@ class _LoginPageState extends State<LoginPage> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () =>
+                        context.router.push(const ForgotPasswordRoute()),
                     child: Text(
                       'Forgot Password?',
                       style: TextStyle(

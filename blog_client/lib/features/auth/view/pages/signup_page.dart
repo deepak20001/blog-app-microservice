@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:blog_client/core/common/enums/verify_otp_purpose_enums.dart';
 import 'package:blog_client/core/common/extensions/padding_extensions.dart';
 import 'package:blog_client/core/common/extensions/size_extensions.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
@@ -48,6 +49,12 @@ class _SignupPageState extends State<SignupPage> {
     switch (state) {
       case AuthSignupSuccessState(:final successMessage):
         SnackbarUtils.showSuccess(context: context, message: successMessage);
+        context.router.push(
+          VerifyOtpRoute(
+            email: _emailController.text.trim(),
+            purpose: VerifyOtpPurposeEnums.emailVerification,
+          ),
+        );
         break;
       case AuthSignupFailureState(:final errorMessage):
         SnackbarUtils.showError(context: context, message: errorMessage);

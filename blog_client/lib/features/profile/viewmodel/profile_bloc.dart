@@ -30,6 +30,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileUnsaveBlogEvent>(_onUnsaveBlogRequested);
     on<ProfileUpvoteBlogEvent>(_onUpvoteBlogRequested);
     on<ProfileUnupvoteBlogEvent>(_onUnupvoteBlogRequested);
+    on<ProfileLogoutEvent>(_onLogoutRequested);
   }
   final ProfileRemoteRepository _profileRemoteRepository;
   final SharedPreferencesStorageRepository _storageRepository;
@@ -456,5 +457,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ),
       );
     }
+  }
+
+  /// Handle logout request
+  Future<void> _onLogoutRequested(
+    ProfileLogoutEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    await _storageRepository.clearUserData();
+    emit(
+      ProfileLogoutState(profileData: state.profileData, blogs: state.blogs),
+    );
   }
 }

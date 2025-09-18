@@ -2,6 +2,9 @@ class AppRoutesName {
   // auth
   static const String login = '/login';
   static const String signup = '/signup';
+  static const String forgotPassword = '/forgot-password';
+  static const String verifyOtp = '/verify-otp';
+  static const String resetPassword = '/reset-password';
 
   // blogs
   static const String blogs = '/blogs';

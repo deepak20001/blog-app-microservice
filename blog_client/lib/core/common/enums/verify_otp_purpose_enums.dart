@@ -1,0 +1,1 @@
+enum VerifyOtpPurposeEnums { emailVerification, passwordReset }

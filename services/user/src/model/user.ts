@@ -13,6 +13,14 @@ export interface IUser extends Document {
     avatar: string;
     role: UserRole;
     isVerified: boolean;
+    emailVerificationOtpHash?: string | null;
+    emailVerificationOtpExpiresAt?: Date | null;
+    emailVerificationAttempts?: number;
+    emailVerificationLastSentAt?: Date | null;
+    passwordResetOtpHash?: string | null;
+    passwordResetOtpExpiresAt?: Date | null;
+    passwordResetAttempts?: number;
+    passwordResetLastSentAt?: Date | null;
 }
 
 const schema: Schema<IUser>  = new Schema({
@@ -47,6 +55,38 @@ const schema: Schema<IUser>  = new Schema({
     isVerified: {
         type: Boolean,
         default: false,
+    },
+    emailVerificationOtpHash: {
+        type: String,
+        default: null,
+    },
+    emailVerificationOtpExpiresAt: {
+        type: Date,
+        default: null,
+    },
+    emailVerificationAttempts: {
+        type: Number,
+        default: 0,
+    },
+    emailVerificationLastSentAt: {
+        type: Date,
+        default: null,
+    },
+    passwordResetOtpHash: {
+        type: String,
+        default: null,
+    },
+    passwordResetOtpExpiresAt: {
+        type: Date,
+        default: null,
+    },
+    passwordResetAttempts: {
+        type: Number,
+        default: 0,
+    },
+    passwordResetLastSentAt: {
+        type: Date,
+        default: null,
     },
 },
 {

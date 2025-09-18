@@ -40,6 +40,10 @@ class _ProfilePageState extends State<ProfilePage>
     });
   }
 
+  void _onLogout() {
+    _profileBloc.add(const ProfileLogoutEvent());
+  }
+
   void _onTabSelected(int index) {
     index == 0
         ? _profileBloc.add(const ProfileGetMyBlogsEvent())
@@ -50,6 +54,13 @@ class _ProfilePageState extends State<ProfilePage>
     switch (state) {
       case ProfileGetMyBlogsFailureState(:final errorMessage):
         SnackbarUtils.showError(context: context, message: errorMessage);
+        break;
+      case ProfileLogoutState():
+        SnackbarUtils.showSuccess(
+          context: context,
+          message: 'Logged out successfully',
+        );
+        context.router.replace(const LoginRoute());
         break;
       default:
         break;
@@ -92,6 +103,10 @@ class _ProfilePageState extends State<ProfilePage>
                 });
               },
               icon: Icon(Icons.edit, color: AppPallete.primaryColor),
+            ),
+            IconButton(
+              onPressed: _onLogout,
+              icon: Icon(Icons.logout, color: AppPallete.errorColor),
             ),
           ],
         ),

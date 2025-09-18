@@ -84,3 +84,11 @@ class ProfileGetUpdatedDataFromLocalStorageEvent extends ProfileEvent {
   @override
   List<Object?> get props => [];
 }
+
+// Logout Event
+class ProfileLogoutEvent extends ProfileEvent {
+  const ProfileLogoutEvent();
+
+  @override
+  List<Object?> get props => [];
+}

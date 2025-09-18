@@ -12,6 +12,15 @@ class ApiEndpoints {
   /// User Service Endpoints
   static String get login => '$userServiceBaseUrl/users/login';
   static String get register => '$userServiceBaseUrl/users/register';
+  static String get verifyEmail => '$userServiceBaseUrl/users/verify-email';
+  static String get resendVerificationOtp =>
+      '$userServiceBaseUrl/users/resend-verification-otp';
+  static String get forgotPassword => '$userServiceBaseUrl/users/forgot-password';
+  static String get resendPasswordResetOtp =>
+      '$userServiceBaseUrl/users/resend-password-reset-otp';
+  static String get verifyPasswordResetOtp =>
+      '$userServiceBaseUrl/users/verify-password-reset-otp';
+  static String get resetPassword => '$userServiceBaseUrl/users/reset-password';
   static String profile({required String id}) =>
       '$userServiceBaseUrl/users/$id';
   static String profileStats({required String id}) =>

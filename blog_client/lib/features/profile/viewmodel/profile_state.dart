@@ -235,3 +235,11 @@ class ProfileUnupvoteFailureState extends ProfileState {
   @override
   List<Object?> get props => [errorMessage, profileApiState, blogsApiState];
 }
+
+// Logout States
+class ProfileLogoutState extends ProfileState {
+  const ProfileLogoutState({
+    required super.profileData,
+    required super.blogs,
+  });
+}
