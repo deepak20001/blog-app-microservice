@@ -10,6 +10,7 @@ import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/core/utils/snack_bar_utils.dart';
 import 'package:blog_client/core/utils/validation_helper.dart';
 import 'package:blog_client/features/edit_profile/view/widgets/build_profile_avatar_section.dart';
+import 'package:blog_client/features/edit_profile/view/widgets/build_security_section.dart';
 import 'package:blog_client/features/edit_profile/viewmodel/edit_profile_bloc.dart';
 import 'package:blog_client/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -209,6 +210,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   fieldName: 'Bio',
                                 ),
                           ),
+                          BuildSecuritySection(size: size),
                         ],
                       ),
                     ),

@@ -30,7 +30,7 @@ const logionSchema = z.object({
     email: z.email(),
     password: z.string().
         min(8, "Password must be atleast 8 characters long").
-        max(10, "Bio must not exceed 10 characters"),
+        max(10, "Password must not exceed 10 characters"),
 });
 
 const updateUserSchema = z.object({
@@ -40,6 +40,24 @@ const updateUserSchema = z.object({
     bio: z.string().
         min(5, "Bio must be at least 5 characters long").
         max(100, "Bio must not exceed 100 characters"),
+});
+
+const changePasswordSchema = z.object({
+    currentPassword: z.string().
+        min(8, "Current password must be atleast 8 characters long").
+        max(10, "Current password must not exceed 10 characters"),
+    newPassword: z.string().
+        min(8, "New password must be atleast 8 characters long").
+        max(10, "New password must not exceed 10 characters"),
+    confirmPassword: z.string().
+        min(8, "Confirm password must be atleast 8 characters long").
+        max(10, "Confirm password must not exceed 10 characters"),
+});
+
+const deleteAccountSchema = z.object({
+    password: z.string().
+        min(8, "Password must be atleast 8 characters long").
+        max(10, "Password must not exceed 10 characters"),
 });
 
 // Controllers ::::::::::
@@ -411,7 +429,7 @@ export const searchUsers = async(req: AuthenticatedRequest, res: Response) => {
         if(!payloadData || !payloadData._id) {
             return res.status(401).json({
                 success: false,
-                error: "Authenticated user",
+                error: "Unauthenticated user",
             });
         }
         
@@ -452,6 +470,136 @@ export const searchUsers = async(req: AuthenticatedRequest, res: Response) => {
                 page,
                 limit,
             },
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const changePassword = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const validationResult = changePasswordSchema.safeParse(req.body);
+        if(!validationResult.success) {
+            const errorMessage = validationResult.error.issues.
+                map((issue) => issue.message).join(", ");
+            return res.status(400).json({
+                success: false,
+                error: errorMessage,
+            });
+        } 
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "UnAuthenticated user",
+            });
+        }
+        
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        if(newPassword !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                error: "New password and confirm password do not match",
+            });
+        }
+        
+        if(currentPassword === newPassword) {
+            return res.status(400).json({
+                success: false,
+                error: "New password must be different from current password",
+            });
+        }
+
+        const userRecord = await User.findById(payloadData._id);
+        if(!userRecord) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found",
+            });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(currentPassword, userRecord.password);
+        if(!isPasswordMatch) {
+            return res.status(401).json({
+                success: false,
+                error: "Invalid credentials",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        if(!hashedPassword) {
+            return res.status(500).json({
+                success: false,
+                error: "Error while processing password",
+            });
+        }
+
+        await User.findByIdAndUpdate(
+            { _id: payloadData._id },
+            {
+                password: hashedPassword,
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Password changed successfully",
+            data: {},
+        });
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
+
+export const deleteAccount = async(req: AuthenticatedRequest, res: Response) => {
+    try {
+        const validationResult = deleteAccountSchema.safeParse(req.body);
+        if(!validationResult.success) {
+            const errorMessage = validationResult.error.issues.
+                map((issue) => issue.message).join(", ");
+            return res.status(400).json({
+                success: false,
+                error: errorMessage,
+            });
+        } 
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "UnAuthenticated user",
+            });
+        }
+        
+        const { password } = req.body;
+        const userRecord = await User.findById(payloadData._id);
+        if(!userRecord) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found",
+            });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password, userRecord.password);
+        if(!isPasswordMatch) {
+            return res.status(401).json({
+                success: false,
+                error: "Invalid credentials",
+            });
+        }
+        
+        await User.deleteOne({ _id: payloadData._id });
+        return res.status(200).json({
+            success: true,
+            message: "Account deleted successfully",
+            data: {},
         });
     } catch (error: any) {
         console.log(error);

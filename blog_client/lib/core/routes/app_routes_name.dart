@@ -13,6 +13,8 @@ class AppRoutesName {
   static const String editProfile = '/edit-profile';
   static const String followers = '/followers';
   static const String followings = '/followings';
+  static const String changePassword = '/change-password';
+  static const String deleteAccount = '/delete-account';
 
   // search
   static const String search = '/search';

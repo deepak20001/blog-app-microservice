@@ -23,6 +23,14 @@ class AppRouter extends RootStackRouter {
     AutoRoute(path: AppRoutesName.editProfile, page: EditProfileRoute.page),
     AutoRoute(path: AppRoutesName.followers, page: FollowersRoute.page),
     AutoRoute(path: AppRoutesName.followings, page: FollowingsRoute.page),
+    AutoRoute(
+      path: AppRoutesName.changePassword,
+      page: ChangePasswordRoute.page,
+    ),
+    AutoRoute(
+      path: AppRoutesName.deleteAccount,
+      page: DeleteAccountRoute.page,
+    ),
 
     // search
     AutoRoute(path: AppRoutesName.search, page: SearchRoute.page),

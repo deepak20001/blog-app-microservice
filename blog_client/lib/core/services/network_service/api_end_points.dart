@@ -77,4 +77,9 @@ class ApiEndpoints {
     required int page,
     required int limit,
   }) => '$userServiceBaseUrl/users?search=$search&page=$page&limit=$limit';
+
+  // Security Service Endpoints
+  static String get changePassword =>
+      '$userServiceBaseUrl/users/change-password';
+  static String get deleteAccount => '$userServiceBaseUrl/users';
 }
