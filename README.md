@@ -4,9 +4,30 @@ A full-stack blog application built with Flutter frontend and microservice backe
 
 ## Screenshots
 
-### Login Screen
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 01 45 12" src="https://github.com/user-attachments/assets/87bb8932-afa4-4143-b45e-7cc36eea1b20" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 01 45 21" src="https://github.com/user-attachments/assets/01fd7086-3566-4393-b081-e411c1454eb1" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 01 49 07" src="https://github.com/user-attachments/assets/6c078609-f603-461c-a6ae-bafad17b0a33" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 26 24" src="https://github.com/user-attachments/assets/46916514-18c9-477c-954f-7ec222f2ace8" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 26 52" src="https://github.com/user-attachments/assets/86b2db51-ee3d-447e-a97f-c31defd25593" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 27 06" src="https://github.com/user-attachments/assets/97675cb6-2b79-463a-aa43-d94a50abcdd8" />
 
-![Login Screen](login_screen.png)
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 14 40" src="https://github.com/user-attachments/assets/e2d928fb-e922-4a7d-b638-cb75354c5397" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 22 39" src="https://github.com/user-attachments/assets/becfc8fb-5709-4fa5-ba15-bfcf5b68cfa4" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 23 22" src="https://github.com/user-attachments/assets/9f50a47a-ffbb-4c56-abdb-aa3879200db5" />
+
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 35 38" src="https://github.com/user-attachments/assets/91d66538-0abd-4db4-bebc-7f018a6f323e" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 01 55 17" src="https://github.com/user-attachments/assets/ad4d31e8-5aef-486f-9377-6a494ed49732" />
+
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 25 25" src="https://github.com/user-attachments/assets/d09c6f4e-e343-414c-a90e-27c888ffeffa" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 24 03" src="https://github.com/user-attachments/assets/e7b3016b-d79d-4f08-805a-040b9cc5b363" />
+
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 24 21" src="https://github.com/user-attachments/assets/1adc77b3-3245-46a7-b3a7-52f3cfea5b15" />
+
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 23 34" src="https://github.com/user-attachments/assets/459b48e2-f612-406d-818a-a5598c5bee89" />
+
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 25 44" src="https://github.com/user-attachments/assets/2a55cc08-ded0-4824-a7a9-2a3e658470d3" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 25 47" src="https://github.com/user-attachments/assets/00ce68e8-93b7-4a87-86b8-90de373eb0c8" />
+<img width="1290" height="2796" alt="Simulator Screenshot - iPhone 16 Plus - 2025-09-20 at 02 25 51" src="https://github.com/user-attachments/assets/5eace186-547e-46eb-93c1-69afe9f4bd60" />
 
 
 ## Architecture Overview
