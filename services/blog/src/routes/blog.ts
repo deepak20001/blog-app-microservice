@@ -42,9 +42,9 @@ router.delete("/unupvote-blog", isAuth, unupvoteBlog);
 // Blog CRUD
 router.post("/", isAuth, createBlog);
 router.get("/filter", isAuth, getBlogs);
-router.get("/my-blogs", isAuth, myBlogs);
+router.get("/my-blogs/:id", isAuth, myBlogs);
 router.get("/user-blogs-count/:id", isAuth, userBlogsCount);
-router.get("/saved-blogs", isAuth, savedBlogs);
+router.get("/saved-blogs/:id", isAuth, savedBlogs);
 router.get("/:id", isAuth, getBlogById);
 router.patch("/:id", isAuth, updateBlog);
 router.delete("/:id", isAuth, deleteBlog);

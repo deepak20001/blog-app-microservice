@@ -3,7 +3,7 @@ import 'package:blog_client/core/common/models/blog_model.dart';
 import 'package:blog_client/core/common/widgets/common_cached_image.dart';
 import 'package:blog_client/core/constants/constants.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
-import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
+import 'package:blog_client/features/blog_details/viewmodel/blog_details_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

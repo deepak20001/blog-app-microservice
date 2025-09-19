@@ -183,12 +183,8 @@ export const getComments = async(req: AuthenticatedRequest, res: Response) => {
                     message: "Comments fetched successfully",
                     data: commentsWithMoreFields,
                     pagination: {
-                        current_page: page,
-                        total_pages: totalPages,
-                        total_items: totalItems,
-                        items_per_page: limit,
-                        has_next: page < totalPages,
-                        has_prev: page > 1,
+                        page,
+                        limit,
                     },
                 });
             } else {
@@ -197,12 +193,8 @@ export const getComments = async(req: AuthenticatedRequest, res: Response) => {
                     message: "Comments fetched successfully",
                     data: [],
                     pagination: {
-                        current_page: page,
-                        total_pages: totalPages,
-                        total_items: totalItems,
-                        items_per_page: limit,
-                        has_next: page < totalPages,
-                        has_prev: page > 1,
+                        page,
+                        limit,
                     },
                 });
             }
@@ -381,7 +373,7 @@ export const deleteComment = async (req: AuthenticatedRequest, res: Response) =>
         return res.status(200).json({
             success: true,
             message: "Comment deleted successfully",
-            data: {},
+            data: {}, 
         });
     } catch (error: any) {
         console.log(error);

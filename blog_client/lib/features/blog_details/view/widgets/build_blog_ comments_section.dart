@@ -5,9 +5,10 @@ import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/widgets/common_cached_image.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
 import 'package:blog_client/core/common/widgets/common_text_form_field_first.dart';
+import 'package:blog_client/core/common/widgets/loader.dart';
 import 'package:blog_client/core/constants/constants.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
-import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
+import 'package:blog_client/features/blog_details/viewmodel/blog_details_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,6 +40,16 @@ class BuildBlogCommentsSection extends StatelessWidget {
   void _onUpvoteComment({required int commentId}) {
     blogDetailsBloc.add(
       BlogDetailsUpvoteCommentEvent(
+        commentId: commentId,
+        blogId: blogDetailsBloc.state.blog.id,
+      ),
+    );
+  }
+
+  // Handle delete comment
+  void _onDeleteComment({required int commentId}) {
+    blogDetailsBloc.add(
+      BlogDetailsDeleteCommentEvent(
         commentId: commentId,
         blogId: blogDetailsBloc.state.blog.id,
       ),
@@ -119,11 +130,16 @@ class BuildBlogCommentsSection extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
-              itemCount: comments.length,
-
+              itemCount: comments.length + (state.isLoadingMore ? 1 : 0),
               itemBuilder: (context, index) {
-                final comment = comments[index];
+                if (index == comments.length && state.isLoadingMore) {
+                  return context.paddingAll(
+                    numD05,
+                    child: Loader(color: AppPallete.primaryColor),
+                  );
+                }
 
+                final comment = comments[index];
                 return Container(
                   padding: context.paddingAll(numD03).padding,
                   decoration: BoxDecoration(
@@ -139,6 +155,7 @@ class BuildBlogCommentsSection extends StatelessWidget {
                     spacing: size.width * numD015,
                     children: [
                       Row(
+                        spacing: size.width * numD02,
                         children: [
                           Container(
                             width: size.width * numD08,
@@ -152,10 +169,19 @@ class BuildBlogCommentsSection extends StatelessWidget {
                             child: ClipOval(
                               child: CommonCachedImage(
                                 imageUrl: comment.author.avatar,
+                                text: comment.author.username,
+                                textStyle: context.bodyMedium.copyWith(
+                                  fontSize: size.width * numD025,
+                                  color: AppPallete.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                                textContainerMargin: EdgeInsets.all(
+                                  size.width * numD01,
+                                ),
                               ),
                             ),
                           ),
-                          context.sizedBoxWidth(numD02),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +202,6 @@ class BuildBlogCommentsSection extends StatelessWidget {
                               ],
                             ),
                           ),
-                          // Like Button
                           Container(
                             decoration: BoxDecoration(
                               color: comment.isVoted
@@ -242,6 +267,71 @@ class BuildBlogCommentsSection extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (blogDetailsBloc.userId == comment.author.id)
+                            BlocBuilder<BlogDetailsBloc, BlogDetailsState>(
+                              builder: (context, state) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: AppPallete.transparentColor,
+                                    borderRadius: BorderRadius.circular(
+                                      size.width * numD06,
+                                    ),
+                                    border: Border.all(
+                                      color: AppPallete.errorColor.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child:
+                                      (state is BlogDetailsDeleteCommentLoadingState &&
+                                          state.commentId == comment.id)
+                                      ? context.paddingAll(
+                                          numD015,
+                                          child: const Loader(
+                                            size: numD06,
+                                            color: AppPallete.errorColor,
+                                          ),
+                                        )
+                                      : InkWell(
+                                          onTap: () {
+                                            _onDeleteComment(
+                                              commentId: comment.id,
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: size.width * numD03,
+                                              vertical: size.width * numD02,
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.delete_outline,
+                                                  color: AppPallete.errorColor,
+                                                  size: size.width * numD04,
+                                                ),
+                                                SizedBox(
+                                                  width: size.width * numD015,
+                                                ),
+                                                CommonText(
+                                                  text: 'Delete',
+                                                  style: context.bodySmall
+                                                      .copyWith(
+                                                        color: AppPallete
+                                                            .errorColor,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                       CommonText(
@@ -262,62 +352,6 @@ class BuildBlogCommentsSection extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildFilterChip(
-    BuildContext context,
-    Size size,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    // final isSelected = _commentSortBy == value;
-
-    return GestureDetector(
-      onTap: () {
-        /*  setState(() {
-          _commentSortBy = value;
-        }); */
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: size.width * numD03,
-          vertical: size.width * numD02,
-        ),
-        decoration: BoxDecoration(
-          color: false
-              ? AppPallete.primaryColor.withValues(alpha: 0.1)
-              : AppPallete.cardBackground,
-          borderRadius: BorderRadius.circular(size.width * numD08),
-          border: Border.all(
-            color: false
-                ? AppPallete.primaryColor.withValues(alpha: 0.3)
-                : AppPallete.greyColor300,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: size.width * numD04,
-              color: false ? AppPallete.primaryColor : AppPallete.greyColor400,
-            ),
-            SizedBox(width: size.width * numD015),
-            CommonText(
-              text: label,
-              style: context.bodySmall.copyWith(
-                color: false
-                    ? AppPallete.primaryColor
-                    : AppPallete.textSecondary,
-                fontWeight: false ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

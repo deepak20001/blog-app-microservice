@@ -1,4 +1,4 @@
-part of 'blogs_details_bloc.dart';
+part of 'blog_details_bloc.dart';
 
 abstract class BlogDetailsEvent extends Equatable {
   const BlogDetailsEvent();
@@ -54,11 +54,12 @@ class BlogDetailsUnupvoteBlogEvent extends BlogDetailsEvent {
 
 // Get Comments Event
 class BlogDetailsGetCommentsEvent extends BlogDetailsEvent {
-  const BlogDetailsGetCommentsEvent({required this.blogId});
+  const BlogDetailsGetCommentsEvent({required this.blogId, this.isLoadMore = false});
   final int blogId;
+  final bool isLoadMore;
 
   @override
-  List<Object?> get props => [blogId];
+  List<Object?> get props => [blogId, isLoadMore];
 }
 
 // Create Comment Event
@@ -75,8 +76,8 @@ class BlogDetailsCreateCommentEvent extends BlogDetailsEvent {
 }
 
 // Delete Comment Event
-class BloDetailsDeleteCommentEvent extends BlogDetailsEvent {
-  const BloDetailsDeleteCommentEvent({
+class BlogDetailsDeleteCommentEvent extends BlogDetailsEvent {
+  const BlogDetailsDeleteCommentEvent({
     required this.commentId,
     required this.blogId,
   });

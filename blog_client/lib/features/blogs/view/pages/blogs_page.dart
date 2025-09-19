@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:blog_client/core/common/enums/api_state_enums.dart';
 import 'package:blog_client/core/common/extensions/padding_extensions.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/widgets/loader.dart';
@@ -27,28 +28,57 @@ class BlogsPage extends StatefulWidget {
 
 class _BlogsPageState extends State<BlogsPage> {
   final _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final BlogsBloc _blogsBloc = getIt<BlogsBloc>();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _blogsBloc.add(const BlogsCategoriesFetchEvent());
       _blogsBloc.add(BlogsFetchEvent(categoryId: 0, search: ''));
+
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+          final currentState = _blogsBloc.state;
+          if (!currentState.isLoadingMore && !_blogsBloc.allItemsLoaded) {
+            final selectedCategory = currentState.categories
+                .where((category) => category.isSelected)
+                .firstOrNull;
+
+            if (selectedCategory != null) {
+              _blogsBloc.add(
+                BlogsFetchEvent(
+                  search: _searchController.text.trim(),
+                  isLoadMore: true,
+                  categoryId: selectedCategory.id,
+                ),
+              );
+            }
+          }
+        }
+      });
     });
   }
 
+  // Handle refresh
   void _onRefresh() {
-    _blogsBloc.add(
-      BlogsFetchEvent(
-        categoryId: _blogsBloc.state.categories
-            .where((category) => category.isSelected)
-            .first
-            .id,
-        search: _searchController.text.trim(),
-      ),
-    );
+    final selectedCategory = _blogsBloc.state.categories
+        .where((category) => category.isSelected)
+        .firstOrNull;
+
+    if (selectedCategory != null) {
+      _blogsBloc.add(
+        BlogsFetchEvent(
+          categoryId: selectedCategory.id,
+          search: _searchController.text.trim(),
+        ),
+      );
+    }
   }
 
+  // Handle category selected
   void _onCategorySelected(int category) {
     _blogsBloc.add(
       BlogsFetchEvent(
@@ -58,20 +88,25 @@ class _BlogsPageState extends State<BlogsPage> {
     );
   }
 
+  // Handle search changed
   void _onSearchChanged(String value) {
     getIt<Debouncer>().run(() async {
-      _blogsBloc.add(
-        BlogsFetchEvent(
-          search: value.trim(),
-          categoryId: _blogsBloc.state.categories
-              .where((category) => category.isSelected)
-              .first
-              .id,
-        ),
-      );
+      final selectedCategory = _blogsBloc.state.categories
+          .where((category) => category.isSelected)
+          .firstOrNull;
+
+      if (selectedCategory != null) {
+        _blogsBloc.add(
+          BlogsFetchEvent(
+            search: value.trim(),
+            categoryId: selectedCategory.id,
+          ),
+        );
+      }
     });
   }
 
+  // Handle bloc listener
   void _onBlocListener(BuildContext context, BlogsState state) {
     switch (state) {
       case BlogsFetchFailureState(:final errorMessage):
@@ -85,6 +120,7 @@ class _BlogsPageState extends State<BlogsPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -157,7 +193,8 @@ class _BlogsPageState extends State<BlogsPage> {
                   onCategorySelected: _onCategorySelected,
                 ),
 
-                if (state is BlogsFetchLoadingState)
+                if (state.blogsApiState == ApiStateEnums.loading &&
+                    !state.isLoadingMore)
                   Expanded(child: Loader(color: AppPallete.primaryColor))
                 else
                   Expanded(
@@ -170,11 +207,23 @@ class _BlogsPageState extends State<BlogsPage> {
                             onRefresh: () async => _onRefresh(),
                             color: AppPallete.primaryColor,
                             child: ListView.builder(
+                              controller: _scrollController,
                               padding: EdgeInsets.zero,
-                              itemCount: state.blogs.length,
+                              itemCount:
+                                  state.blogs.length +
+                                  (state.isLoadingMore ? 1 : 0),
                               itemBuilder: (context, index) {
-                                final blog = state.blogs[index];
+                                if (index == state.blogs.length &&
+                                    state.isLoadingMore) {
+                                  return context.paddingAll(
+                                    numD05,
+                                    child: Loader(
+                                      color: AppPallete.primaryColor,
+                                    ),
+                                  );
+                                }
 
+                                final blog = state.blogs[index];
                                 return BuildBlogCard(
                                   blog: blog,
                                   onTap: () {

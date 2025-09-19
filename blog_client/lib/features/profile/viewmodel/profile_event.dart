@@ -27,18 +27,22 @@ class ProfileGetUserProfileStatsEvent extends ProfileEvent {
 
 // Get My Blogs Event
 class ProfileGetMyBlogsEvent extends ProfileEvent {
-  const ProfileGetMyBlogsEvent();
+  const ProfileGetMyBlogsEvent({required this.id, this.isLoadMore = false});
+  final String id;
+  final bool isLoadMore;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [isLoadMore];
 }
 
 // Get Saved Blogs Event
 class ProfileGetSavedBlogsEvent extends ProfileEvent {
-  const ProfileGetSavedBlogsEvent();
+  const ProfileGetSavedBlogsEvent({required this.id, this.isLoadMore = false});
+  final String id;
+  final bool isLoadMore;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [id, isLoadMore];
 }
 
 // Save Blog Event
@@ -91,4 +95,40 @@ class ProfileLogoutEvent extends ProfileEvent {
 
   @override
   List<Object?> get props => [];
+}
+
+// Follow Profile Event
+class ProfileFollowProfileEvent extends ProfileEvent {
+  const ProfileFollowProfileEvent({required this.id});
+  final String id;
+
+  @override
+  List<Object?> get props => [id];
+}
+
+// Unfollow Profile Event
+class ProfileUnfollowProfileEvent extends ProfileEvent {
+  const ProfileUnfollowProfileEvent({required this.id});
+  final String id;
+
+  @override
+  List<Object?> get props => [id];
+}
+
+// Update follow-followings data
+class ProfileUpdateFollowFollowingsDataEvent extends ProfileEvent {
+  const ProfileUpdateFollowFollowingsDataEvent({required this.isFollowing});
+  final bool isFollowing;
+
+  @override
+  List<Object?> get props => [isFollowing];
+}
+
+// Delete Blog Event
+class ProfileDeleteBlogEvent extends ProfileEvent {
+  const ProfileDeleteBlogEvent({required this.blogId});
+  final int blogId;
+
+  @override
+  List<Object?> get props => [blogId];
 }

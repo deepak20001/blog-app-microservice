@@ -31,10 +31,18 @@ class BuildProfileHeader extends StatelessWidget {
           ),
           child: ClipOval(
             child: CommonCachedImage(
+              textContainerMargin: EdgeInsets.all(size.width * numD04),
               imageUrl: profileData.avatar,
               width: size.width * numD25,
               height: size.width * numD25,
               fit: BoxFit.cover,
+              text: profileData.username,
+              textStyle: context.bodyMedium.copyWith(
+                fontSize: size.width * numD08,
+                color: AppPallete.primaryColor,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
         ),

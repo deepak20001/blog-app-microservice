@@ -120,7 +120,14 @@ class CreateBlogCreateBlogLoadingState extends CreateBlogState {
 }
 
 class CreateBlogCreateBlogSuccessState extends CreateBlogState {
-  const CreateBlogCreateBlogSuccessState({required super.categories});
+  const CreateBlogCreateBlogSuccessState({
+    required super.categories,
+    required this.successMessage,
+  });
+  final String successMessage;
+
+  @override
+  List<Object?> get props => [successMessage, imagePath, categories];
 }
 
 class CreateBlogCreateBlogFailureState extends CreateBlogState {

@@ -10,7 +10,6 @@ import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/flutter_html.dart';
 
 class BuildBlogCard extends StatelessWidget {
   const BuildBlogCard({
@@ -112,6 +111,10 @@ class BuildBlogCard extends StatelessWidget {
                         child: ClipOval(
                           child: CommonCachedImage(
                             imageUrl: blog.author.avatar,
+                            text: blog.author.username,
+                            textContainerMargin: EdgeInsets.all(
+                              size.width * numD01,
+                            ),
                           ),
                         ),
                       ),
@@ -143,7 +146,8 @@ class BuildBlogCard extends StatelessWidget {
                             bloc: blogsBloc,
                             buildWhen: (previous, current) =>
                                 current is BlogsSaveLoadingState ||
-                                current is BlogsUnsaveLoadingState,
+                                current is BlogsUnsaveLoadingState ||
+                                current is BlogsFetchSuccessState,
                             builder: (context, state) {
                               final currentBlog = state.blogs.firstWhere(
                                 (b) => b.id == blog.id,
@@ -177,7 +181,8 @@ class BuildBlogCard extends StatelessWidget {
                               bloc: blogsBloc,
                               buildWhen: (previous, current) =>
                                   current is BlogsUpvoteLoadingState ||
-                                  current is BlogsUnupvoteLoadingState,
+                                  current is BlogsUnupvoteLoadingState ||
+                                  current is BlogsFetchSuccessState,
                               builder: (context, state) {
                                 final currentBlog = state.blogs.firstWhere(
                                   (b) => b.id == blog.id,

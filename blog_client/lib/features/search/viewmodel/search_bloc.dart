@@ -16,16 +16,30 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<SearchGetUsersEvent>(_onGetUsersRequested);
   }
   final SearchRemoteRepository _searchRemoteRepository;
-  final int _page = 1;
-  final int _limit = 10;
+  int _page = 1;
+  int _limit = 20;
+  bool allItemsLoaded = false;
 
   // Handle get users
   Future<void> _onGetUsersRequested(
     SearchGetUsersEvent event,
     Emitter<SearchState> emit,
   ) async {
-    emit(SearchGetUsersLoadingState());
+    if (!event.isLoadMore) {
+      _page = 0;
+      allItemsLoaded = false;
+    }
+    if (allItemsLoaded) {
+      return;
+    }
+    _page++;
 
+    emit(
+      SearchGetUsersLoadingState(
+        isLoadingMore: event.isLoadMore,
+        users: state.users,
+      ),
+    );
     try {
       final result = await _searchRemoteRepository.searchUsers(
         search: event.search,
@@ -36,10 +50,26 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       await result.fold(
         (failure) {
           devtools.log('Get Users failed: ${failure.message}');
-          emit(SearchGetUsersFailureState(errorMessage: failure.message));
+          emit(
+            SearchGetUsersFailureState(
+              errorMessage: failure.message,
+              users: state.users,
+            ),
+          ); 
         },
         (List<ProfileModel> data) async {
-          emit(SearchGetUsersSuccessState(users: data));
+          if (data.isEmpty || data.length < _limit) {
+            allItemsLoaded = true;
+          }
+          final updatedUsers = event.isLoadMore
+              ? [...state.users, ...data]
+              : data;
+          emit(
+            SearchGetUsersSuccessState(
+              users: updatedUsers,
+              isLoadingMore: false,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {
@@ -50,6 +80,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       emit(
         SearchGetUsersFailureState(
           errorMessage: 'An unexpected error occurred. Please try again.',
+          users: state.users,
+          isLoadingMore: false,
         ),
       );
     }

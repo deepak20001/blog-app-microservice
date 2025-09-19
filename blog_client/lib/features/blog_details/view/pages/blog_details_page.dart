@@ -13,7 +13,7 @@ import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/core/utils/snack_bar_utils.dart';
 import 'package:blog_client/features/blog_details/view/widgets/build_blog_%20comments_section.dart';
 import 'package:blog_client/features/blog_details/view/widgets/build_sliver_blog_details_appbar.dart';
-import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
+import 'package:blog_client/features/blog_details/viewmodel/blog_details_bloc.dart';
 import 'package:blog_client/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,6 +31,7 @@ class BlogDetailsPage extends StatefulWidget {
 class _BlogDetailsPageState extends State<BlogDetailsPage> {
   final TextEditingController _commentController = TextEditingController();
   final BlogDetailsBloc _blogDetailsBloc = getIt<BlogDetailsBloc>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -38,6 +39,21 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _blogDetailsBloc.add(BlogDetailsFetchEvent(id: widget.blogId.toString()));
       _blogDetailsBloc.add(BlogDetailsGetCommentsEvent(blogId: widget.blogId));
+
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+          final currentState = _blogDetailsBloc.state;
+          if (!currentState.isLoadingMore && !_blogDetailsBloc.allItemsLoaded) {
+            _blogDetailsBloc.add(
+              BlogDetailsGetCommentsEvent(
+                blogId: widget.blogId,
+                isLoadMore: true,
+              ),
+            );
+          }
+        }
+      });
     });
   }
 
@@ -51,8 +67,13 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
 
   void _onBlocListener(BuildContext context, BlogDetailsState state) {
     switch (state) {
-      case BlogDetailsCreateCommentLoadingState(:final successMessage):
+      case BlogDetailsCreateCommentLoadingState(:final successMessage) ||
+          BlogDetailsDeleteCommentSuccessState(:final successMessage):
         SnackbarUtils.showSuccess(context: context, message: successMessage);
+        break;
+      case BlogDetailsCreateCommentFailureState(:final errorMessage) ||
+          BlogDetailsDeleteCommentFailureState(:final errorMessage):
+        SnackbarUtils.showError(context: context, message: errorMessage);
         break;
       default:
         break;
@@ -62,6 +83,7 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
   @override
   void dispose() {
     _commentController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -83,6 +105,8 @@ class _BlogDetailsPageState extends State<BlogDetailsPage> {
           body: (state.blogDetailsApiState == ApiStateEnums.loading)
               ? Loader(color: AppPallete.primaryColor)
               : CustomScrollView(
+                  controller: _scrollController,
+
                   slivers: [
                     BuildSliverBlogDetailsAppbar(
                       blog: blog,

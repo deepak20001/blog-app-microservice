@@ -3,7 +3,7 @@ import 'package:blog_client/core/routes/app_routes.dart';
 import 'package:blog_client/core/theme/theme.dart';
 import 'package:blog_client/core/utils/simple_bloc_observer.dart';
 import 'package:blog_client/features/auth/viewmodel/auth_bloc.dart';
-import 'package:blog_client/features/blog_details/viewmodel/blogs_details_bloc.dart';
+import 'package:blog_client/features/blog_details/viewmodel/blog_details_bloc.dart';
 import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
 import 'package:blog_client/features/create_blog/viewmodel/create_blog_bloc.dart';
 import 'package:blog_client/features/edit_profile/viewmodel/edit_profile_bloc.dart';

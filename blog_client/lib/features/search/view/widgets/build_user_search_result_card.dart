@@ -1,8 +1,10 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:blog_client/core/common/extensions/text_theme_extensions.dart';
 import 'package:blog_client/core/common/models/profile_model.dart';
 import 'package:blog_client/core/common/widgets/common_cached_image.dart';
 import 'package:blog_client/core/common/widgets/common_text.dart';
 import 'package:blog_client/core/constants/constants.dart';
+import 'package:blog_client/core/routes/app_routes.gr.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:flutter/material.dart';
 
@@ -33,36 +35,42 @@ class BuildUserSearchResultCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        spacing: size.width * numD02,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppPallete.primaryColor.withValues(alpha: numD3),
-                width: 2,
+      child: InkWell(
+        onTap: () {
+          context.router.push(ProfileRoute(id: user.id));
+        },
+        child: Row(
+          spacing: size.width * numD02,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppPallete.primaryColor.withValues(alpha: numD3),
+                  width: 2,
+                ),
+              ),
+              child: ClipOval(
+                child: CommonCachedImage(
+                  imageUrl: user.avatar,
+                  width: size.width * numD12,
+                  height: size.width * numD12,
+                  fit: BoxFit.cover,
+                  text: user.username,
+                ),
               ),
             ),
-            child: ClipOval(
-              child: CommonCachedImage(
-                imageUrl: user.avatar,
-                width: size.width * numD12,
-                height: size.width * numD12,
-                fit: BoxFit.cover,
+            Expanded(
+              child: CommonText(
+                text: user.username,
+                style: context.titleMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppPallete.textPrimary,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: CommonText(
-              text: user.username,
-              style: context.titleMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppPallete.textPrimary,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

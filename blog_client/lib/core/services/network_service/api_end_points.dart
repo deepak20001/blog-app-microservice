@@ -15,7 +15,8 @@ class ApiEndpoints {
   static String get verifyEmail => '$userServiceBaseUrl/users/verify-email';
   static String get resendVerificationOtp =>
       '$userServiceBaseUrl/users/resend-verification-otp';
-  static String get forgotPassword => '$userServiceBaseUrl/users/forgot-password';
+  static String get forgotPassword =>
+      '$userServiceBaseUrl/users/forgot-password';
   static String get resendPasswordResetOtp =>
       '$userServiceBaseUrl/users/resend-password-reset-otp';
   static String get verifyPasswordResetOtp =>
@@ -45,22 +46,29 @@ class ApiEndpoints {
       '$blogServiceBaseUrl/blogs/$id';
   static String get createBlog => '$blogServiceBaseUrl/blogs';
   static String get updateBlog => '$blogServiceBaseUrl/blogs';
-  static String get deleteBlog => '$blogServiceBaseUrl/blogs';
+  static String deleteBlog({required int blogId}) =>
+      '$blogServiceBaseUrl/blogs/$blogId';
   static String get saveBlog => '$blogServiceBaseUrl/blogs/save-blog';
   static String get unsaveBlog => '$blogServiceBaseUrl/blogs/unsave-blog';
   static String get upvoteBlog => '$blogServiceBaseUrl/blogs/upvote-blog';
   static String get unupvoteBlog => '$blogServiceBaseUrl/blogs/unupvote-blog';
-  static String get getMyBlogs => '$blogServiceBaseUrl/blogs/my-blogs';
-  static String get getSavedBlogs => '$blogServiceBaseUrl/blogs/saved-blogs';
+  static String getMyBlogs({required String id}) =>
+      '$blogServiceBaseUrl/blogs/my-blogs/$id';
+  static String getSavedBlogs({required String id}) =>
+      '$blogServiceBaseUrl/blogs/saved-blogs/$id';
 
   /// Media Service Endpoints
   static String get uploadBlogImage => '$mediaServiceBaseUrl/media/blog-image';
   static String get uploadAvatar => '$mediaServiceBaseUrl/media/avatar-upload';
 
   /// Comment Service Endpoints
-  static String fetchComments({required int blogId}) =>
-      '$blogServiceBaseUrl/comments/$blogId';
+  static String fetchComments({
+    required int blogId,
+    required int page,
+    required int limit,
+  }) => '$blogServiceBaseUrl/comments/$blogId?page=$page&limit=$limit';
   static String get createComment => '$blogServiceBaseUrl/comments';
+  static String get deleteComment => '$blogServiceBaseUrl/comments';
   static String get upvoteComment => '$blogServiceBaseUrl/comments/upvote';
   static String get unupvoteComment => '$blogServiceBaseUrl/comments/unupvote';
 

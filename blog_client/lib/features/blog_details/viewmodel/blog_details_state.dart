@@ -1,4 +1,4 @@
-part of 'blogs_details_bloc.dart';
+part of 'blog_details_bloc.dart';
 
 sealed class BlogDetailsState extends Equatable {
   const BlogDetailsState({
@@ -6,11 +6,13 @@ sealed class BlogDetailsState extends Equatable {
     this.comments = const <CommentModel>[],
     this.blogDetailsApiState = ApiStateEnums.initial,
     this.commentsApiState = ApiStateEnums.initial,
+    this.isLoadingMore = false,
   });
   final BlogModel blog;
   final List<CommentModel> comments;
   final ApiStateEnums blogDetailsApiState;
   final ApiStateEnums commentsApiState;
+  final bool isLoadingMore;
 
   @override
   List<Object?> get props => [
@@ -18,6 +20,7 @@ sealed class BlogDetailsState extends Equatable {
     comments,
     blogDetailsApiState,
     commentsApiState,
+    isLoadingMore,
   ];
 }
 
@@ -175,6 +178,8 @@ class BlogDetailsGetCommentsLoadingState extends BlogDetailsState {
     required super.blog,
     super.commentsApiState = ApiStateEnums.loading,
     required super.blogDetailsApiState,
+    super.isLoadingMore,
+    required super.comments,
   });
 }
 
@@ -184,6 +189,7 @@ class BlogDetailsGetCommentsSuccessState extends BlogDetailsState {
     super.commentsApiState = ApiStateEnums.success,
     required super.blogDetailsApiState,
     required super.comments,
+    super.isLoadingMore,
   });
 }
 
@@ -193,6 +199,8 @@ class BlogDetailsGetCommentsFailureState extends BlogDetailsState {
     required this.errorMessage,
     super.commentsApiState = ApiStateEnums.failure,
     required super.blogDetailsApiState,
+    super.isLoadingMore,
+    required super.comments,
   });
   final String errorMessage;
 
@@ -203,6 +211,7 @@ class BlogDetailsGetCommentsFailureState extends BlogDetailsState {
     blogDetailsApiState,
     commentsApiState,
     comments,
+    isLoadingMore,
   ];
 }
 
@@ -282,6 +291,43 @@ class BlogDetailsUnupvoteCommentSuccessState extends BlogDetailsState {
 
 class BlogDetailsUnupvoteCommentFailureState extends BlogDetailsState {
   const BlogDetailsUnupvoteCommentFailureState({
+    required super.blog,
+    required super.comments,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, blog, comments];
+}
+
+// Delete Comment States
+class BlogDetailsDeleteCommentLoadingState extends BlogDetailsState {
+  const BlogDetailsDeleteCommentLoadingState({
+    required super.blog,
+    required super.comments,
+    required this.commentId,
+  });
+  final int commentId;
+
+  @override
+  List<Object?> get props => [commentId, blog, comments];
+}
+
+class BlogDetailsDeleteCommentSuccessState extends BlogDetailsState {
+  const BlogDetailsDeleteCommentSuccessState({
+    required super.blog,
+    required super.comments,
+    required this.successMessage,
+  });
+  final String successMessage;
+
+  @override
+  List<Object?> get props => [successMessage, blog, comments];
+}
+
+class BlogDetailsDeleteCommentFailureState extends BlogDetailsState {
+  const BlogDetailsDeleteCommentFailureState({
     required super.blog,
     required super.comments,
     required this.errorMessage,

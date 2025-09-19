@@ -7,6 +7,7 @@ import 'package:blog_client/core/routes/app_routes.gr.dart';
 import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BuildProfileStats extends StatelessWidget {
   const BuildProfileStats({
@@ -33,65 +34,74 @@ class BuildProfileStats extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // Blogs Count
-          Expanded(
-            child: _buildStatItem(
-              context: context,
-              title: 'Blogs',
-              count: profileBloc.state.profileData.userPostedBlogsCount
-                  .toString(),
-              icon: Icons.article_outlined,
-            ),
-          ),
-
-          Container(
-            width: 1,
-            height: size.width * numD15,
-            color: AppPallete.greyColor300,
-          ),
-
-          // Followers Count
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                context.router.push(
-                  FollowersRoute(userId: profileBloc.state.profileData.id),
-                );
-              },
-              child: _buildStatItem(
-                context: context,
-                title: 'Followers',
-                count: profileBloc.state.profileData.followersCount.toString(),
-                icon: Icons.people_outline,
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        bloc: profileBloc,
+        buildWhen: (previous, current) =>
+            previous.profileData != current.profileData,
+        builder: (context, state) {
+          return Row(
+            children: [
+              // Blogs Count
+              Expanded(
+                child: _buildStatItem(
+                  context: context,
+                  title: 'Blogs',
+                  count: profileBloc.state.profileData.userPostedBlogsCount
+                      .toString(),
+                  icon: Icons.article_outlined,
+                ),
               ),
-            ),
-          ),
 
-          Container(
-            width: 1,
-            height: size.width * numD15,
-            color: AppPallete.greyColor300,
-          ),
-
-          // Following Count
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                context.router.push(
-                  FollowingsRoute(userId: profileBloc.state.profileData.id),
-                );
-              },
-              child: _buildStatItem(
-                context: context,
-                title: 'Following',
-                count: profileBloc.state.profileData.followingsCount.toString(),
-                icon: Icons.person_add_outlined,
+              Container(
+                width: 1,
+                height: size.width * numD15,
+                color: AppPallete.greyColor300,
               ),
-            ),
-          ),
-        ],
+
+              // Followers Count
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    context.router.push(
+                      FollowersRoute(userId: profileBloc.state.profileData.id),
+                    );
+                  },
+                  child: _buildStatItem(
+                    context: context,
+                    title: 'Followers',
+                    count: profileBloc.state.profileData.followersCount
+                        .toString(),
+                    icon: Icons.people_outline,
+                  ),
+                ),
+              ),
+
+              Container(
+                width: 1,
+                height: size.width * numD15,
+                color: AppPallete.greyColor300,
+              ),
+
+              // Following Count
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    context.router.push(
+                      FollowingsRoute(userId: profileBloc.state.profileData.id),
+                    );
+                  },
+                  child: _buildStatItem(
+                    context: context,
+                    title: 'Following',
+                    count: profileBloc.state.profileData.followingsCount
+                        .toString(),
+                    icon: Icons.person_add_outlined,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

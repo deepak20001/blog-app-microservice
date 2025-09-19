@@ -11,16 +11,17 @@ import 'package:blog_client/core/theme/app_pallete.dart';
 import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/flutter_html.dart';
 
 class BuildBlogsSection extends StatelessWidget {
   const BuildBlogsSection({
     super.key,
     required this.size,
     required this.profileBloc,
+    required this.scrollController,
   });
   final Size size;
   final ProfileBloc profileBloc;
+  final ScrollController scrollController;
 
   // Save blog
   void _onSaveBlog(int blogId) {
@@ -42,6 +43,11 @@ class BuildBlogsSection extends StatelessWidget {
     profileBloc.add(ProfileUnupvoteBlogEvent(blogId: blogId));
   }
 
+  // Delete blog
+  void _onDeleteBlog(int blogId) {
+    profileBloc.add(ProfileDeleteBlogEvent(blogId: blogId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
@@ -52,19 +58,31 @@ class BuildBlogsSection extends StatelessWidget {
           current is ProfileGetMyBlogsSuccessState ||
           current is ProfileGetSavedBlogsLoadingState ||
           current is ProfileGetSavedBlogsFailureState ||
-          current is ProfileGetSavedBlogsSuccessState,
+          current is ProfileGetSavedBlogsSuccessState ||
+          current is ProfileDeleteBlogLoadingState ||
+          current is ProfileDeleteBlogSuccessState ||
+          current is ProfileDeleteBlogFailureState,
       bloc: profileBloc,
       builder: (context, state) {
-        if (state.blogsApiState == ApiStateEnums.loading) {
+        if (state.blogsApiState == ApiStateEnums.loading &&
+            !state.isLoadingMore) {
           return Loader(color: AppPallete.primaryColor);
         }
         if (state.blogs.isEmpty) {
           return _buildEmptyBlogsState(context);
         }
         return ListView.builder(
+          controller: scrollController,
           padding: EdgeInsets.all(size.width * numD035),
-          itemCount: state.blogs.length,
+          itemCount: state.blogs.length + (state.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
+            if (index == state.blogs.length && state.isLoadingMore) {
+              return context.paddingAll(
+                numD05,
+                child: Loader(color: AppPallete.primaryColor),
+              );
+            }
+
             final blog = state.blogs[index];
 
             return Container(
@@ -110,23 +128,11 @@ class BuildBlogsSection extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Html(
-                          data: blog.description,
-                          style: {
-                            'body': Style(
-                              maxLines: 3,
-                              textOverflow: TextOverflow.ellipsis,
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                            ),
-                            'p': Style(
-                              maxLines: 2,
-                              textOverflow: TextOverflow.ellipsis,
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                              color: AppPallete.textSecondary,
-                            ),
-                          },
+                        CommonText(
+                          text: blog.shortDescription,
+                          style: context.bodySmall.copyWith(
+                            color: AppPallete.textSecondary,
+                          ),
                         ),
                         Row(
                           children: [
@@ -234,6 +240,35 @@ class BuildBlogsSection extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                context.sizedBoxWidth(numD01),
+                                if (profileBloc.userId == blog.author.id)
+                                  BlocSelector<ProfileBloc, ProfileState, bool>(
+                                    selector: (state) {
+                                      return state
+                                              is ProfileDeleteBlogLoadingState &&
+                                          state.blogId == blog.id;
+                                    },
+                                    builder: (context, isDeleting) {
+                                      if (isDeleting) {
+                                        return Center(
+                                          child: const Loader(
+                                            size: numD08,
+                                            color: AppPallete.errorColor,
+                                          ),
+                                        );
+                                      }
+                                      return IconButton(
+                                        onPressed: () {
+                                          _onDeleteBlog(blog.id);
+                                        },
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: AppPallete.errorColor,
+                                          size: size.width * numD06,
+                                        ),
+                                      );
+                                    },
+                                  ),
                               ],
                             ),
                           ],

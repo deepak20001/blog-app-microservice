@@ -27,10 +27,12 @@ abstract interface class BlogDetailsRemoteRepository {
   // Get Comments
   Future<Either<Failure, List<CommentModel>>> getComments({
     required int blogId,
+    required int page,
+    required int limit,
   });
 
   // Create Comment
-  Future<Either<Failure, int>> createComment({
+  Future<Either<Failure, CommentModel>> createComment({
     required int blogId,
     required String comment,
   });
@@ -200,11 +202,13 @@ class BlogDetialsRemoteRepositoryImpl implements BlogDetailsRemoteRepository {
   @override
   Future<Either<Failure, List<CommentModel>>> getComments({
     required int blogId,
+    required int page,
+    required int limit,
   }) async {
     return TaskEither<Failure, List<CommentModel>>.tryCatch(
       () async {
         final response = await _dioClient.get<Map<String, dynamic>>(
-          ApiEndpoints.fetchComments(blogId: blogId),
+          ApiEndpoints.fetchComments(blogId: blogId, page: page, limit: limit),
         );
 
         final data = response.data!;
@@ -229,11 +233,11 @@ class BlogDetialsRemoteRepositoryImpl implements BlogDetailsRemoteRepository {
   }
 
   @override
-  Future<Either<Failure, int>> createComment({
+  Future<Either<Failure, CommentModel>> createComment({
     required int blogId,
     required String comment,
   }) async {
-    return TaskEither<Failure, int>.tryCatch(
+    return TaskEither<Failure, CommentModel>.tryCatch(
       () async {
         final response = await _dioClient.post<Map<String, dynamic>>(
           ApiEndpoints.createComment,
@@ -241,8 +245,7 @@ class BlogDetialsRemoteRepositoryImpl implements BlogDetailsRemoteRepository {
         );
 
         final data = response.data!;
-        final commentId = data['data']['id'] as int;
-        return commentId;
+        return CommentModel.fromJson(data['data']);
       },
       (error, stackTrace) {
         devtools.log(
@@ -266,7 +269,7 @@ class BlogDetialsRemoteRepositoryImpl implements BlogDetailsRemoteRepository {
     return TaskEither<Failure, String>.tryCatch(
       () async {
         final response = await _dioClient.delete<Map<String, dynamic>>(
-          ApiEndpoints.login,
+          ApiEndpoints.deleteComment,
           data: {'blog_id': blogId, 'comment_id': commentId},
         );
 

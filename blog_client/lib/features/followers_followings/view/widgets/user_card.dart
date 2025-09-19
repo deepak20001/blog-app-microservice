@@ -78,6 +78,9 @@ class UserCard extends StatelessWidget {
                 width: size.width * numD15,
                 height: size.width * numD15,
                 fit: BoxFit.cover,
+                text: isFollowers
+                    ? user.follower.username
+                    : user.following.username,
               ),
             ),
           ),

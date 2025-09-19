@@ -1,6 +1,8 @@
 import 'dart:developer' as devtools show log;
 import 'package:blog_client/features/followers_followings/models/follower_following_model.dart';
 import 'package:blog_client/features/followers_followings/repositories/followers_followings_remote_repository.dart';
+import 'package:blog_client/features/profile/viewmodel/profile_bloc.dart';
+import 'package:blog_client/injection_container.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -138,6 +140,9 @@ class FollowFollowingsBloc
           );
         },
         (_) async {
+          getIt<ProfileBloc>().add(
+            ProfileUpdateFollowFollowingsDataEvent(isFollowing: true),
+          );
           emit(FollowFollowingsFollowProfileSuccessState(data: updatedData));
         },
       );
@@ -186,6 +191,9 @@ class FollowFollowingsBloc
           );
         },
         (_) async {
+          getIt<ProfileBloc>().add(
+            ProfileUpdateFollowFollowingsDataEvent(isFollowing: false),
+          );
           emit(FollowFollowingsUnfollowProfileSuccessState(data: updatedData));
         },
       );

@@ -1,6 +1,9 @@
 import 'dart:developer' as devtools show log;
 import 'package:blog_client/features/blogs/models/category_model.dart';
+import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart'
+    as blogsBloc;
 import 'package:blog_client/features/create_blog/repositories/create_blog_remote_repository.dart';
+import 'package:blog_client/injection_container.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -28,6 +31,7 @@ class CreateBlogBloc extends Bloc<CreateBlogEvent, CreateBlogState> {
     );
   }
   final CreateBlogRemoteRepository _createBlogRemoteRepository;
+  // Defer resolving BlogsBloc to usage time to avoid init order issues
 
   // Handle pick image
   Future<void> _onCreateBlogPickImageRequested(
@@ -230,8 +234,18 @@ class CreateBlogBloc extends Bloc<CreateBlogEvent, CreateBlogState> {
             ),
           );
         },
-        (String message) async {
-          emit(CreateBlogCreateBlogSuccessState(categories: state.categories));
+        (data) async {
+          final successMessage = data.$1;
+          final blog = data.$2;
+          getIt<blogsBloc.BlogsBloc>().add(
+            blogsBloc.BlogsAddedBlogEvent(blog: blog),
+          );
+          emit(
+            CreateBlogCreateBlogSuccessState(
+              categories: state.categories,
+              successMessage: successMessage,
+            ),
+          );
         },
       );
     } on Exception catch (e, stackTrace) {

@@ -1,10 +1,15 @@
 part of 'search_bloc.dart';
 
 sealed class SearchState extends Equatable {
-  const SearchState();
+  const SearchState({
+    this.isLoadingMore = false,
+    this.users = const <ProfileModel>[],
+  });
+  final bool isLoadingMore;
+  final List<ProfileModel> users;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [isLoadingMore, users];
 }
 
 class SearchInitialState extends SearchState {
@@ -13,21 +18,24 @@ class SearchInitialState extends SearchState {
 
 // Get Search Users States
 class SearchGetUsersLoadingState extends SearchState {
-  const SearchGetUsersLoadingState();
+  const SearchGetUsersLoadingState({super.isLoadingMore, required super.users});
 }
 
 class SearchGetUsersSuccessState extends SearchState {
-  const SearchGetUsersSuccessState({required this.users});
-  final List<ProfileModel> users;
+  const SearchGetUsersSuccessState({required super.users, super.isLoadingMore});
 
   @override
-  List<Object?> get props => [users];
+  List<Object?> get props => [users, isLoadingMore];
 }
 
 class SearchGetUsersFailureState extends SearchState {
-  const SearchGetUsersFailureState({required this.errorMessage});
+  const SearchGetUsersFailureState({
+    required this.errorMessage,
+    required super.users,
+    super.isLoadingMore,
+  });
   final String errorMessage;
 
   @override
-  List<Object?> get props => [errorMessage];
+  List<Object?> get props => [errorMessage, isLoadingMore, users];
 }

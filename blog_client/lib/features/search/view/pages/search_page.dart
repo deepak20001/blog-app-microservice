@@ -26,6 +26,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final SearchBloc _searchBloc = getIt<SearchBloc>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -34,6 +35,21 @@ class _SearchPageState extends State<SearchPage> {
       _searchBloc.add(
         SearchGetUsersEvent(search: _searchController.text.trim()),
       );
+
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+          final currentState = _searchBloc.state;
+          if (!currentState.isLoadingMore && !_searchBloc.allItemsLoaded) {
+            _searchBloc.add(
+              SearchGetUsersEvent(
+                search: _searchController.text.trim(),
+                isLoadMore: true,
+              ),
+            );
+          }
+        }
+      });
     });
   }
 
@@ -58,6 +74,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -116,29 +133,38 @@ class _SearchPageState extends State<SearchPage> {
                     current is! SearchGetUsersSuccessState ||
                     current is! SearchGetUsersFailureState,
                 builder: (context, state) {
-                  if (state is SearchGetUsersLoadingState) {
+                  if (state is SearchGetUsersLoadingState &&
+                      !state.isLoadingMore) {
                     return Expanded(
                       child: Loader(color: AppPallete.primaryColor),
                     );
                   }
-                  if (state is SearchGetUsersSuccessState) {
-                    return Expanded(
-                      child: state.users.isEmpty
-                          ? _buildEmptyState(size)
-                          : ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: state.users.length,
-                              itemBuilder: (context, index) {
-                                final user = state.users[index];
-                                return BuildUserSearchResultCard(
-                                  size: size,
-                                  user: user,
+                  return Expanded(
+                    child: state.users.isEmpty
+                        ? _buildEmptyState(size)
+                        : ListView.builder(
+                            controller: _scrollController,
+                            padding: EdgeInsets.zero,
+                            itemCount:
+                                state.users.length +
+                                (state.isLoadingMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == state.users.length &&
+                                  state.isLoadingMore) {
+                                return context.paddingAll(
+                                  numD05,
+                                  child: Loader(color: AppPallete.primaryColor),
                                 );
-                              },
-                            ),
-                    );
-                  }
-                  return const SizedBox.shrink();
+                              }
+
+                              final user = state.users[index];
+                              return BuildUserSearchResultCard(
+                                size: size,
+                                user: user,
+                              );
+                            },
+                          ),
+                  );
                 },
               ),
             ],

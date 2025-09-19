@@ -18,6 +18,7 @@ sealed class ProfileModel with _$ProfileModel {
     @Default(0) int followersCount,
     @Default(0) int followingsCount,
     @Default(0) int userPostedBlogsCount, 
+    @Default(false) bool isFollowing,
   }) = _ProfileModel;
   const ProfileModel._();
 

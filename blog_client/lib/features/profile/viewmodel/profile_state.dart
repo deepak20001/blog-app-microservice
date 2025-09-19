@@ -6,11 +6,13 @@ sealed class ProfileState extends Equatable {
     this.blogs = const <BlogModel>[],
     this.profileApiState = ApiStateEnums.initial,
     this.blogsApiState = ApiStateEnums.initial,
+    this.isLoadingMore = false,
   });
   final ProfileModel profileData;
   final List<BlogModel> blogs;
   final ApiStateEnums profileApiState;
   final ApiStateEnums blogsApiState;
+  final bool isLoadingMore;
 
   @override
   List<Object?> get props => [
@@ -18,6 +20,7 @@ sealed class ProfileState extends Equatable {
     blogs,
     profileApiState,
     blogsApiState,
+    isLoadingMore,
   ];
 }
 
@@ -67,6 +70,8 @@ class ProfileGetMyBlogsLoadingState extends ProfileState {
     super.blogsApiState = ApiStateEnums.loading,
     required super.profileApiState,
     required super.profileData,
+    super.isLoadingMore,
+    required super.blogs,
   });
 }
 
@@ -76,6 +81,7 @@ class ProfileGetMyBlogsSuccessState extends ProfileState {
     required super.profileApiState,
     required super.profileData,
     super.blogsApiState = ApiStateEnums.success,
+    super.isLoadingMore,
   });
 }
 
@@ -85,6 +91,8 @@ class ProfileGetMyBlogsFailureState extends ProfileState {
     super.blogsApiState = ApiStateEnums.failure,
     required super.profileApiState,
     required super.profileData,
+    super.isLoadingMore,
+    required super.blogs,
   });
   final String errorMessage;
 
@@ -94,6 +102,8 @@ class ProfileGetMyBlogsFailureState extends ProfileState {
     profileApiState,
     blogsApiState,
     profileData,
+    isLoadingMore,
+    blogs,
   ];
 }
 
@@ -103,6 +113,8 @@ class ProfileGetSavedBlogsLoadingState extends ProfileState {
     super.blogsApiState = ApiStateEnums.loading,
     required super.profileApiState,
     required super.profileData,
+    super.isLoadingMore,
+    required super.blogs,
   });
 }
 
@@ -112,6 +124,7 @@ class ProfileGetSavedBlogsSuccessState extends ProfileState {
     required super.profileApiState,
     required super.profileData,
     super.blogsApiState = ApiStateEnums.success,
+    super.isLoadingMore,
   });
 }
 
@@ -121,11 +134,20 @@ class ProfileGetSavedBlogsFailureState extends ProfileState {
     super.blogsApiState = ApiStateEnums.failure,
     required super.profileApiState,
     required super.profileData,
+    super.isLoadingMore,
+    required super.blogs,
   });
   final String errorMessage;
 
   @override
-  List<Object?> get props => [errorMessage, profileApiState, blogsApiState, profileData];
+  List<Object?> get props => [
+    errorMessage,
+    profileApiState,
+    blogsApiState,
+    profileData,
+    isLoadingMore,
+    blogs,
+  ];
 }
 
 // Save Blog States
@@ -238,8 +260,96 @@ class ProfileUnupvoteFailureState extends ProfileState {
 
 // Logout States
 class ProfileLogoutState extends ProfileState {
-  const ProfileLogoutState({
+  const ProfileLogoutState({required super.profileData, required super.blogs});
+}
+
+// Follow Profile States
+class ProfileFollowProfileLoadingState extends ProfileState {
+  const ProfileFollowProfileLoadingState({
     required super.profileData,
     required super.blogs,
   });
+}
+
+class ProfileFollowProfileSuccessState extends ProfileState {
+  const ProfileFollowProfileSuccessState({
+    required super.profileData,
+    required super.blogs,
+  });
+}
+
+class ProfileFollowProfileFailureState extends ProfileState {
+  const ProfileFollowProfileFailureState({
+    required super.profileData,
+    required super.blogs,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, profileApiState, blogsApiState];
+}
+
+// Unfollow Profile States
+class ProfileUnfollowProfileLoadingState extends ProfileState {
+  const ProfileUnfollowProfileLoadingState({
+    required super.profileData,
+    required super.blogs,
+  });
+}
+
+class ProfileUnfollowProfileSuccessState extends ProfileState {
+  const ProfileUnfollowProfileSuccessState({
+    required super.profileData,
+    required super.blogs,
+  });
+}
+
+class ProfileUnfollowProfileFailureState extends ProfileState {
+  const ProfileUnfollowProfileFailureState({
+    required super.profileData,
+    required super.blogs,
+    required this.errorMessage,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, profileApiState, blogsApiState];
+}
+
+// Delete Blog States
+class ProfileDeleteBlogLoadingState extends ProfileState {
+  const ProfileDeleteBlogLoadingState({
+    required super.profileData,
+    required super.blogs,
+    required this.blogId,
+  });
+  final int blogId;
+
+  @override
+  List<Object?> get props => [blogId, profileData, blogs];
+}
+
+class ProfileDeleteBlogSuccessState extends ProfileState {
+  const ProfileDeleteBlogSuccessState({
+    required super.profileData,
+    required super.blogs,
+    required this.successMessage,
+  });
+  final String successMessage;
+
+  @override
+  List<Object?> get props => [successMessage, profileData, blogs];
+}
+
+class ProfileDeleteBlogFailureState extends ProfileState {
+  const ProfileDeleteBlogFailureState({
+    required this.errorMessage,
+    required super.profileData,
+    required super.blogs,
+  });
+  final String errorMessage;
+
+  @override
+  List<Object?> get props => [errorMessage, profileData, blogs];
 }

@@ -9,8 +9,9 @@ abstract class SearchEvent extends Equatable {
 
 // get users
 class SearchGetUsersEvent extends SearchEvent {
-  const SearchGetUsersEvent({required this.search});
+  const SearchGetUsersEvent({required this.search, this.isLoadMore = false});
   final String search;
+  final bool isLoadMore;
   @override
-  List<Object?> get props => [search];
+  List<Object?> get props => [search, isLoadMore];
 }

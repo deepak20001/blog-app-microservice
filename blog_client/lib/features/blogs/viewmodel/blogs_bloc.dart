@@ -1,4 +1,5 @@
 import 'dart:developer' as devtools show log;
+import 'package:blog_client/core/common/enums/api_state_enums.dart';
 import 'package:blog_client/core/common/models/blog_model.dart';
 import 'package:blog_client/features/blogs/models/category_model.dart';
 import 'package:blog_client/features/blogs/repositories/blogs_remote_repository.dart';
@@ -20,10 +21,14 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     on<BlogsUnsaveBlogEvent>(_onUnsaveBlogRequested);
     on<BlogsUpvoteBlogEvent>(_onUpvoteBlogRequested);
     on<BlogsUnupvoteBlogEvent>(_onUnupvoteBlogRequested);
+    on<BlogsAddedBlogEvent>(_onAddedBlogRequested);
+    on<BlogsUpdateLikeEvent>(_onUpdateLikeRequested);
+    on<BlogsUpdateSaveEvent>(_onUpdateSaveRequested);
   }
   final BlogsRemoteRepository _blogsRemoteRepository;
-  final int _page = 1;
-  final int _limit = 10;
+  int _page = 0;
+  int _limit = 5;
+  bool allItemsLoaded = false;
 
   // Handle categories fetch
   Future<void> _onCategoriesFetchRequested(
@@ -34,6 +39,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
       BlogsCategoriesFetchLoadingState(
         categories: state.categories,
         blogs: state.blogs,
+        blogsApiState: state.blogsApiState,
       ),
     );
 
@@ -48,6 +54,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
+              blogsApiState: state.blogsApiState,
             ),
           );
         },
@@ -61,6 +68,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
             BlogsCategoriesFetchSuccessState(
               categories: categories,
               blogs: state.blogs,
+              blogsApiState: state.blogsApiState,
             ),
           );
         },
@@ -75,6 +83,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
+          blogsApiState: state.blogsApiState,
         ),
       );
     }
@@ -85,14 +94,28 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
     BlogsFetchEvent event,
     Emitter<BlogsState> emit,
   ) async {
+    if (!event.isLoadMore) {
+      _page = 0;
+      allItemsLoaded = false;
+    }
+    if (allItemsLoaded) {
+      return;
+    }
+    _page++;
+
     final updatedCategories = state.categories.map((category) {
       if (category.id == event.categoryId) {
         return category.copyWith(isSelected: true);
       }
       return category.copyWith(isSelected: false);
     }).toList();
+
     emit(
-      BlogsFetchLoadingState(categories: updatedCategories, blogs: state.blogs),
+      BlogsFetchLoadingState(
+        categories: updatedCategories,
+        blogs: state.blogs,
+        isLoadingMore: event.isLoadMore,
+      ),
     );
 
     try {
@@ -111,13 +134,23 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
               errorMessage: failure.message,
               categories: state.categories,
               blogs: state.blogs,
+              isLoadingMore: event.isLoadMore,
             ),
           );
         },
-        (data) async {
-          final blogs = data;
+        (List<BlogModel> blogs) async {
+          if (blogs.isEmpty || blogs.length < _limit) {
+            allItemsLoaded = true;
+          }
+          final updatedBlogs = event.isLoadMore
+              ? [...state.blogs, ...blogs]
+              : blogs;
           emit(
-            BlogsFetchSuccessState(categories: state.categories, blogs: blogs),
+            BlogsFetchSuccessState(
+              categories: state.categories,
+              blogs: updatedBlogs,
+              isLoadingMore: false,
+            ),
           );
         },
       );
@@ -131,6 +164,7 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
           categories: state.categories,
           blogs: state.blogs,
           errorMessage: 'An unexpected error occurred. Please try again.',
+          isLoadingMore: event.isLoadMore,
         ),
       );
     }
@@ -364,5 +398,51 @@ class BlogsBloc extends Bloc<BlogsEvent, BlogsState> {
         ),
       );
     }
+  }
+
+  /// Handle added blog
+  Future<void> _onAddedBlogRequested(
+    BlogsAddedBlogEvent event,
+    Emitter<BlogsState> emit,
+  ) async {
+    final updatedBlogs = [event.blog, ...state.blogs];
+    emit(
+      BlogsFetchSuccessState(categories: state.categories, blogs: updatedBlogs),
+    );
+  }
+
+  /// Handle update like
+  Future<void> _onUpdateLikeRequested(
+    BlogsUpdateLikeEvent event,
+    Emitter<BlogsState> emit,
+  ) async {
+    final updatedBlogs = state.blogs.map((blog) {
+      if (blog.id == event.blogId) {
+        return blog.copyWith(
+          isLiked: event.isLiked,
+          voteCount: event.isLiked ? blog.voteCount + 1 : blog.voteCount - 1,
+        );
+      }
+      return blog;
+    }).toList();
+    emit(
+      BlogsFetchSuccessState(categories: state.categories, blogs: updatedBlogs),
+    );
+  }
+
+  /// Handle update save
+  Future<void> _onUpdateSaveRequested(
+    BlogsUpdateSaveEvent event,
+    Emitter<BlogsState> emit,
+  ) async {
+    final updatedBlogs = state.blogs.map((blog) {
+      if (blog.id == event.blogId) {
+        return blog.copyWith(isSaved: event.isSaved);
+      }
+      return blog;
+    }).toList();
+    emit(
+      BlogsFetchSuccessState(categories: state.categories, blogs: updatedBlogs),
+    );
   }
 }

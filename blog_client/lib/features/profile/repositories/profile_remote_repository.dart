@@ -14,12 +14,14 @@ abstract interface class ProfileRemoteRepository {
 
   // Get My Blogs
   Future<Either<Failure, List<BlogModel>>> getMyBlogs({
+    required String id,
     required int page,
     required int limit,
   });
 
   // Get Saved Blogs
   Future<Either<Failure, List<BlogModel>>> getSavedBlogs({
+    required String id,
     required int page,
     required int limit,
   });
@@ -35,6 +37,15 @@ abstract interface class ProfileRemoteRepository {
 
   // Unlike Blog
   Future<Either<Failure, String>> unupvoteBlog({required int blogId});
+
+  // Follow profile
+  Future<Either<Failure, String>> followProfile({required String id});
+
+  // Unfollow profile
+  Future<Either<Failure, String>> unfollowProfile({required String id});
+
+  // Delete Blog
+  Future<Either<Failure, String>> deleteBlog({required int blogId});
 }
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -75,13 +86,14 @@ class ProfileRemoteRepositoryImpl implements ProfileRemoteRepository {
 
   @override
   Future<Either<Failure, List<BlogModel>>> getMyBlogs({
+    required String id,
     required int page,
     required int limit,
   }) async {
     return TaskEither<Failure, List<BlogModel>>.tryCatch(
       () async {
         final response = await _dioClient.get<Map<String, dynamic>>(
-          ApiEndpoints.getMyBlogs,
+          ApiEndpoints.getMyBlogs(id: id),
           queryParameters: {'page': page, 'limit': limit},
         );
 
@@ -107,13 +119,14 @@ class ProfileRemoteRepositoryImpl implements ProfileRemoteRepository {
 
   @override
   Future<Either<Failure, List<BlogModel>>> getSavedBlogs({
+    required String id,
     required int page,
     required int limit,
   }) async {
     return TaskEither<Failure, List<BlogModel>>.tryCatch(
       () async {
         final response = await _dioClient.get<Map<String, dynamic>>(
-          ApiEndpoints.getSavedBlogs,
+          ApiEndpoints.getSavedBlogs(id: id),
           queryParameters: {'page': page, 'limit': limit},
         );
 
@@ -241,6 +254,86 @@ class ProfileRemoteRepositoryImpl implements ProfileRemoteRepository {
           return Failure(error.message);
         }
         return Failure('Unupvote Blog failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> followProfile({required String id}) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.followProfile,
+          data: {'id': id},
+        );
+
+        final data = response.data!;
+        final message = data['message'] as String;
+        return message;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Follow Profile error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Follow Profile failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> unfollowProfile({required String id}) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          ApiEndpoints.unfollowProfile,
+          data: {'id': id},
+        );
+
+        final data = response.data!;
+        final message = data['message'] as String;
+        return message;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Unfollow Profile error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Unfollow Profile failed. Please try again.');
+      },
+    ).run();
+  }
+
+  @override
+  Future<Either<Failure, String>> deleteBlog({required int blogId}) async {
+    return TaskEither<Failure, String>.tryCatch(
+      () async {
+        final response = await _dioClient.delete<Map<String, dynamic>>(
+          ApiEndpoints.deleteBlog(blogId: blogId),
+        );
+
+        final data = response.data!;
+        final message = data['message'] as String;
+        return message;
+      },
+      (error, stackTrace) {
+        devtools.log(
+          'Delete Blog error: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (error is NetworkException) {
+          return Failure(error.message);
+        }
+        return Failure('Delete Blog failed. Please try again.');
       },
     ).run();
   }

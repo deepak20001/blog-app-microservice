@@ -424,12 +424,8 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 success: true,
                 data: blogsWithAuthor,
                 pagination: {
-                    current_page: page,
-                    total_pages: totalPages,
-                    total_items: totalItems,
-                    items_per_page: limit,
-                    has_next: page < totalPages,
-                    has_prev: page > 1,
+                    page,
+                    limit,
                 },
             });
         } else {
@@ -565,7 +561,7 @@ export const deleteBlog = async(req: AuthenticatedRequest, res: Response) => {
         }
 
         await sql`
-            DELETE FROM blogs WHERE id = ${1} AND author_id = ${authorId}
+            DELETE FROM blogs WHERE id = ${blodId} AND author_id = ${authorId}
         `;
 
         res.status(200).json({
@@ -770,18 +766,18 @@ export const unupvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
 
 export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
     try {
-        const payloadData = req.user;
-        if(!payloadData || !payloadData._id) {
-            return res.status(401).json({
+        const { id } = req.params;
+        if(!id) {
+            return res.status(400).json({
                 success: false,
-                error: "Unauthenticated user",
+                error: "Invalid id",
             });
         }
 
         const myBlogsCount = await sql`
             SELECT COUNT(*):: int as count
             FROM blogs 
-            WHERE author_id = ${payloadData._id}
+            WHERE author_id = ${id}
         `;
         if(!myBlogsCount || myBlogsCount.length === 0) {
             return res.status(500).json({
@@ -793,12 +789,10 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
         const offset = (page - 1) * limit;
-        const totalItems = parseInt(myBlogsCount[0]?.count);
-        const totalPages = Math.ceil(totalItems/limit);
 
         const result = await sql`
             SELECT * FROM blogs 
-            WHERE author_id = ${payloadData._id}
+            WHERE author_id = ${id}
             ORDER BY created_at DESC
             LIMIT ${limit} OFFSET ${offset}    
         `;
@@ -815,12 +809,8 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 success: true,
                 data: [],
                 pagination: {
-                    current_page: page,
-                    total_pages: totalPages,
-                    total_items: totalItems,
-                    items_per_page: limit,
-                    has_next: page < totalPages,
-                    has_prev: page > 1,
+                    page,
+                    limit,
                 },
             });
         } 
@@ -834,7 +824,7 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
             });
         }
         const authorResult = await axios.get(
-            `${process.env.USER_SERVICE_URL}/api/v1/users/${payloadData._id}`,
+            `${process.env.USER_SERVICE_URL}/api/v1/users/${id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -862,7 +852,7 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
         const userVotes = await sql`
             SELECT blog_id
             FROM upvotes
-            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${id}
         `;
         const votedMap = new Set(userVotes.map(v => v.blog_id));
 
@@ -870,7 +860,7 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
         const userSaved = await sql`
             SELECT blog_id
             FROM savedblogs
-            WHERE blog_id = ANY(${blogIds}) AND user_id = ${payloadData._id}
+            WHERE blog_id = ANY(${blogIds}) AND user_id = ${id}
         `;
         const savedMap = new Set(userSaved.map(v => v.blog_id));
 
@@ -889,12 +879,8 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
             success: true,
             data: updatedResponse,
             pagination: {
-                current_page: page,
-                total_pages: totalPages,
-                total_items: totalItems,
-                items_per_page: limit,
-                has_next: page < totalPages,
-                has_prev: page > 1,
+                page,
+                limit,
             },
         });
     } catch (error: any) {
@@ -908,18 +894,17 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
 
 export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const payloadData = req.user;
-        if(!payloadData || !payloadData._id) {
-            return res.status(401).json({
+        const { id } = req.params;
+        if(!id) {
+            return res.status(400).json({
                 success: false,
-                error: "Unauthenticated user",
+                error: "Invalid id",
             });
         }
-        
         // get-my-saved-blogs
         const mysavedBlogs = await sql`
             SELECT * FROM savedblogs
-            WHERE user_id = ${payloadData._id}
+            WHERE user_id = ${id}
         `;
         const savedBlogsIds = mysavedBlogs.map(v => parseInt(v.blog_id));
         
@@ -993,14 +978,14 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
         const userVotes = await sql`
             SELECT blog_id
             FROM upvotes
-            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${payloadData._id}
+            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${id}
         `;
         const votedMap = new Set(userVotes.map(v => v.blog_id));
         // is-saved
         const userSaves = await sql`
             SELECT blog_id
             FROM savedblogs
-            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${payloadData._id}
+            WHERE blog_id = ANY(${savedBlogsIds}) AND user_id = ${id}
         `;
         const savedMap = new Set(userSaves.map(v => v.blog_id));
 
@@ -1018,8 +1003,8 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
             success: true,
             data: updatedResult,
             pagination: {
-                current_page: page,
-                items_per_page: limit,
+                page,
+                limit,
             },
         });
     } catch (error: any) {
@@ -1108,6 +1093,7 @@ export const generateAiTitle = async(req: AuthenticatedRequest, res: Response) =
         });
     }
 };
+
 export const generateAiShortDescription = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { title, shortDescription, description } = req.body;

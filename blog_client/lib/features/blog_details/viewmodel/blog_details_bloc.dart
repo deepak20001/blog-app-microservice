@@ -5,12 +5,14 @@ import 'package:blog_client/core/common/models/profile_model.dart';
 import 'package:blog_client/core/services/local_db_service/shared_preferences_storage_repository.dart';
 import 'package:blog_client/features/blog_details/models/comment_model.dart';
 import 'package:blog_client/features/blog_details/repositories/blog_details_remote_repository.dart';
+import 'package:blog_client/features/blogs/viewmodel/blogs_bloc.dart';
+import 'package:blog_client/injection_container.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 part 'blog_details_event.dart';
-part 'blogs_details_state.dart';
+part 'blog_details_state.dart';
 
 @singleton
 class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
@@ -29,12 +31,17 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
     on<BlogDetailsCreateCommentEvent>(_onCreateCommentRequested);
     on<BlogDetailsUpvoteCommentEvent>(_onUpvoteCommentRequested);
     on<BlogDetailsUnupvoteCommentEvent>(_onUnupvoteCommentRequested);
+    on<BlogDetailsDeleteCommentEvent>(_onDeleteCommentRequested);
   }
   final BlogDetailsRemoteRepository _blogDetailsRemoteRepository;
   final SharedPreferencesStorageRepository _storageRepository;
+  int _page = 0;
+  int _limit = 10;
+  bool allItemsLoaded = false;
 
   // getters
   String get userProfileImage => _storageRepository.userProfileImage;
+  String get userId => _storageRepository.userId;
 
   // Handle blog details fetch
   Future<void> _onBlogDetailsFetchRequested(
@@ -119,6 +126,9 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
           );
         },
         (_) async {
+          getIt<BlogsBloc>().add(
+            BlogsUpdateSaveEvent(blogId: event.blogId, isSaved: true),
+          );
           emit(
             BlogDetailsSaveBlogSuccessState(
               blog: updatedBlog,
@@ -172,6 +182,9 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
           );
         },
         (_) async {
+          getIt<BlogsBloc>().add(
+            BlogsUpdateSaveEvent(blogId: event.blogId, isSaved: false),
+          );
           emit(
             BlogDetailsUnsaveBlogSuccessState(
               blog: updatedBlog,
@@ -228,6 +241,9 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
           );
         },
         (_) async {
+          getIt<BlogsBloc>().add(
+            BlogsUpdateLikeEvent(blogId: event.blogId, isLiked: true),
+          );
           emit(
             BlogDetailsUpvoteBlogSuccessState(
               blog: updatedBlog,
@@ -284,6 +300,9 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
           );
         },
         (_) async {
+          getIt<BlogsBloc>().add(
+            BlogsUpdateLikeEvent(blogId: event.blogId, isLiked: false),
+          );
           emit(
             BlogDetailsUnupvoteBlogSuccessState(
               blog: updatedBlog,
@@ -312,6 +331,14 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
     BlogDetailsGetCommentsEvent event,
     Emitter<BlogDetailsState> emit,
   ) async {
+    if (!event.isLoadMore) {
+      _page = 0;
+      allItemsLoaded = false;
+    }
+    if (allItemsLoaded) {
+      return;
+    }
+    _page++;
     if (state.commentsApiState == ApiStateEnums.loading) {
       return;
     }
@@ -319,12 +346,16 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
       BlogDetailsGetCommentsLoadingState(
         blog: state.blog,
         blogDetailsApiState: state.blogDetailsApiState,
+        comments: state.comments,
+        isLoadingMore: event.isLoadMore,
       ),
     );
 
     try {
       final result = await _blogDetailsRemoteRepository.getComments(
         blogId: event.blogId,
+        page: _page,
+        limit: _limit,
       );
 
       await result.fold(
@@ -335,15 +366,22 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
               errorMessage: failure.message,
               blogDetailsApiState: state.blogDetailsApiState,
               blog: state.blog,
+              comments: state.comments,
             ),
           );
         },
         (List<CommentModel> comments) async {
+          if (comments.isEmpty || comments.length < _limit) {
+            allItemsLoaded = true;
+          }
+          final updatedComments = event.isLoadMore
+              ? [...state.comments, ...comments]
+              : comments;
           emit(
             BlogDetailsGetCommentsSuccessState(
               blog: state.blog,
               blogDetailsApiState: state.blogDetailsApiState,
-              comments: comments,
+              comments: updatedComments,
             ),
           );
         },
@@ -357,6 +395,7 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
         BlogDetailsGetCommentsFailureState(
           blog: state.blog,
           blogDetailsApiState: state.blogDetailsApiState,
+          comments: state.comments,
           errorMessage: 'An unexpected error occurred. Please try again.',
         ),
       );
@@ -417,15 +456,78 @@ class BlogDetailsBloc extends Bloc<BlogDetailsEvent, BlogDetailsState> {
             ),
           );
         },
-        (int commentId) async {
-          final updatedComments = state.comments.last.copyWith(id: commentId);
+        (CommentModel comment) async {
+          final updatedComment = state.comments.first.copyWith(
+            id: comment.id,
+            createdAt: comment.createdAt,
+            voteCount: comment.voteCount,
+            isVoted: comment.isVoted,
+          );
+          final updatedComments = [
+            updatedComment,
+            ...state.comments.skip(1).toList(),
+          ];
           emit(
             BlogDetailsCreateCommentSuccessState(
               blog: state.blog,
-              comments: [
-                ...state.comments.take(state.comments.length - 1),
-                updatedComments,
-              ],
+              comments: updatedComments.toList(),
+            ),
+          );
+        },
+      );
+    } on Exception catch (e, stackTrace) {
+      devtools.log(
+        'Unexpected error during create comment: $e',
+        stackTrace: stackTrace,
+      );
+      emit(
+        BlogDetailsCreateCommentFailureState(
+          blog: state.blog,
+          comments: state.comments,
+          errorMessage: 'An unexpected error occurred. Please try again.',
+        ),
+      );
+    }
+  }
+
+  /// Handle delete comment
+  Future<void> _onDeleteCommentRequested(
+    BlogDetailsDeleteCommentEvent event,
+    Emitter<BlogDetailsState> emit,
+  ) async {
+    emit(
+      BlogDetailsDeleteCommentLoadingState(
+        blog: state.blog,
+        comments: state.comments,
+        commentId: event.commentId,
+      ),
+    );
+    try {
+      final result = await _blogDetailsRemoteRepository.deleteComment(
+        blogId: event.blogId,
+        commentId: event.commentId,
+      );
+
+      await result.fold(
+        (failure) {
+          devtools.log('Delete Comment failed: ${failure.message}');
+          emit(
+            BlogDetailsDeleteCommentFailureState(
+              errorMessage: failure.message,
+              comments: state.comments,
+              blog: state.blog,
+            ),
+          );
+        },
+        (final successMessage) async {
+          final updatedComments = state.comments
+              .where((comment) => comment.id != event.commentId)
+              .toList();
+          emit(
+            BlogDetailsDeleteCommentSuccessState(
+              blog: state.blog,
+              comments: updatedComments,
+              successMessage: successMessage,
             ),
           );
         },

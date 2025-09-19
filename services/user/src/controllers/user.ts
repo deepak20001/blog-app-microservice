@@ -347,6 +347,13 @@ export const login = async(req: Request, res: Response) => {
 
 export const getUserProfile = async(req: AuthenticatedRequest, res: Response) => {
     try {
+        const payloadData = req.user;
+        if(!payloadData || !payloadData._id) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthorized",
+            });
+        }
         const {id} = req.params;
 
         if(!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -370,6 +377,11 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
             followerId: id,
         }).countDocuments();
 
+        const amIFollowingUserRecord = await Relationship.find({
+            followerId: req.user?._id,
+            followingId: id,
+        });
+
         const token = getTokenFromHeader(req);
         if (!token) {
                 return res.status(401).json({
@@ -383,7 +395,7 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
                 Authorization: `Bearer ${token}`,
             }
         });
-        if(!userPostedBlogsCount) {
+        if(!userPostedBlogsCount) {   
             return res.status(400).json({
                 success: false,
                 error: "Error fetching blogs count",
@@ -404,6 +416,7 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
                 followersCount: followersRecordCount,
                 followingsCount: followingsRecordCount,
                 userPostedBlogsCount: userPostedBlogsCount.data.data,
+                isFollowing: (!amIFollowingUserRecord || amIFollowingUserRecord.length === 0) ? false : true,
             },
         });
     } catch (error: any) {
