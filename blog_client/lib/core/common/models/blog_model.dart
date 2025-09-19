@@ -12,7 +12,7 @@ sealed class BlogModel with _$BlogModel {
     @JsonKey(name: 'short_description') @Default('') String shortDescription,
     @Default('') String description,
     @JsonKey(name: 'image_url') @Default('') String imageUrl,
-    @JsonKey(name: 'category_id') @Default('') String categoryId,
+    @JsonKey(name: 'category_id') @Default(0) int categoryId,
     @JsonKey(name: 'author_id') @Default('') String authorId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
     @JsonKey(name: 'vote_count') @Default(0) int voteCount,
