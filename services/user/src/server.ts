@@ -3,20 +3,26 @@ import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import userRoutes from "./routes/user.js";
 import relationshipRoutes from "./routes/relationship.js"
-import {v2 as cloudinary} from "cloudinary";
 import cors from "cors";
+import { createClient } from "redis";
 
 dotenv.config();
-
-cloudinary.config({ 
-    cloud_name: process.env.CLOUD_NAME as string,
-    api_key: process.env.CLOUD_API_KEY as string,
-    api_secret: process.env.CLOUD_API_SECRET as string,
-});
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+export const redisClient = createClient({
+    url: process.env.REDIS_URL as string,
+});
+
+redisClient
+    .connect() 
+    .then(() => console.log("Connected to Redis::::::::::"))
+    .catch((error) => {
+        console.error("Redis connection failed:", error.message);
+        console.log("Running without Redis cache...");
+    });
 
 app.use("/api/v1/health", (req, res) => {
     res.send("User service running successfully");

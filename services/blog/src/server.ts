@@ -1,18 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import {sql} from "./utils/db.js";
+import { sql } from "./utils/db.js";
 import blogRoutes from "./routes/blog.js";
 import commentRoutes from "./routes/comment.js"
-import {v2 as cloudinary} from "cloudinary";
+import { createClient } from "redis";
 
 dotenv.config();
-
-cloudinary.config({ 
-    cloud_name: process.env.CLOUD_NAME as string,
-    api_key: process.env.CLOUD_API_KEY as string,
-    api_secret: process.env.CLOUD_API_SECRET as string,
-});
-
 
 const app = express();
 app.use(express.json());
@@ -79,6 +72,18 @@ async function initDB() {
         console.log("Error initDb", error);
     }
 }
+
+export const redisClient = createClient({
+    url: process.env.REDIS_URL as string,
+});
+
+redisClient
+    .connect() 
+    .then(() => console.log("Connected to Redis::::::::::"))
+    .catch((error) => {
+        console.error("Redis connection failed:", error.message);
+        console.log("Running without Redis cache...");
+    });
 
 app.use("/api/health", (req, res) => { 
     res.send("Author service is running successfully");

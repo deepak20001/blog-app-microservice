@@ -9,6 +9,7 @@ import Relationship from "../model/relationship.js";
 import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
 import { sendEmail } from "../utils/send_email.js";
+import { RedisCache } from "../utils/cache.js";
 
 // Validation schemas
 const registerSchema = z.object({
@@ -362,12 +363,21 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
                 error: "Invalid user ID",
             });
         }
+
+        const cacheKey = `user:${id}`;
+        const cachedUser = await RedisCache.get(cacheKey);
+        if(cachedUser) {
+            console.log('Cache Hit::::Returning user from cache');
+            return res.status(200).json(cachedUser);
+        }
+        console.log('Cache Miss::::::::Fetching user from database');
+
         const userRecord = await User.findById(id).select("-password");
         if(!userRecord) {
             return res.status(404).json({
                 success: false,
                 error: "User not found",
-            });
+            }); 
         }
 
         const followersRecordCount = await Relationship.find({
@@ -402,8 +412,7 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
             });
         }
 
-
-        return res.status(200).json({
+        const responseData = {
             success: true,
             data: {
                 _id: userRecord.id,
@@ -418,7 +427,12 @@ export const getUserProfile = async(req: AuthenticatedRequest, res: Response) =>
                 userPostedBlogsCount: userPostedBlogsCount.data.data,
                 isFollowing: (!amIFollowingUserRecord || amIFollowingUserRecord.length === 0) ? false : true,
             },
-        });
+        };
+        
+        // 45 minutes (2700 seconds)
+        await RedisCache.set(cacheKey, responseData, 2700);
+        console.log('User saved to cache::::::::');
+        return res.status(200).json(responseData);
     } catch (error: any) {
         console.log(error);
         return res.status(500).json({

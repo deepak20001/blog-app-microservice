@@ -5,6 +5,7 @@ import { success, z } from "zod";
 import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
 import { GoogleGenAI } from "@google/genai";
+import { RedisCache } from "../utils/cache.js";
 
 // Validation schemas
 const createCategorySchema = z.object({
@@ -78,6 +79,14 @@ export const createCategory = async(req: AuthenticatedRequest, res: Response) =>
 
 export const getCategories = async(req: AuthenticatedRequest, res: Response ) => {
     try {
+        const cacheKey = 'categories:all';
+        const cachedCategories = await RedisCache.get(cacheKey);
+        if (cachedCategories) {
+            console.log('Cache Hit::::Returning categories from cache');
+            return res.status(200).json(cachedCategories);
+        }
+        console.log('Cache Miss::::::::Fetching categories from database');
+        
         const categoriesRecord = await sql`
             SELECT * FROM categories
             ORDER BY created_at ASC
@@ -89,11 +98,17 @@ export const getCategories = async(req: AuthenticatedRequest, res: Response ) =>
             });
         }
 
-        return res.status(200).json({
+        const responseData = {
             success: true,
             message: "Categories fetched successfully",
             data: categoriesRecord,
-        });
+        };
+
+        // 2 hours (7200 seconds)
+        await RedisCache.set(cacheKey, responseData, 7200);
+        console.log('Categories saved to cache::::::::');
+
+        return res.status(200).json(responseData);
     } catch (error: any) {
         console.log(error);
         res.status(500).json({
@@ -200,6 +215,14 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
                 error: "Invalid blog ID",
             });
         }
+
+        const cacheKey = `blog:${id}:user:${payloadData._id}`;
+        const cachedBlog = await RedisCache.get(cacheKey);
+        if (cachedBlog) {
+            console.log('Cache Hit::::Returning blog from cache');
+            return res.status(200).json(cachedBlog);
+        }
+        console.log('Cache Miss::::::::Fetching blog from database');
         
         // vote-count
         const voteCount = await sql`
@@ -260,7 +283,7 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
                 error: "Invalid authorId: author does not exist",
             })
         } 
-        return res.status(200).json({
+        const responseData = {
             success: true,
             message: "Blog fetched successfully",
             data: {
@@ -270,7 +293,13 @@ export const getBlogById = async(req: AuthenticatedRequest, res: Response) => {
                 is_voted: isVoted,
                 is_saved: isSaved,
             },
-        });
+        };
+
+        // 20 minutes (1200 seconds)
+        await RedisCache.set(cacheKey, responseData, 1200);
+        console.log('Blog saved to cache::::::::');
+
+        return res.status(200).json(responseData);
     } catch (error: any) {
         console.log(error);
         res.status(500).json({
@@ -291,13 +320,21 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
         }
         
         const {category_id: categoryId, search} = req.query;
-        const categoryRecord = await sql`
-            SELECT * FROM categories WHERE id = ${categoryId}
-        `;
-
         const page = parseInt(req.query.page as string) || 1;
         const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
         const offset = (page - 1) * limit;
+
+        const cacheKey = `blogs:page${page}:limit${limit}:cat${categoryId || 'all'}:search${search || 'none'}`;
+        const cachedData = await RedisCache.get(cacheKey);
+        if (cachedData) {
+            console.log('Cache Hit::::Returning blogs from cache');
+            return res.status(200).json(cachedData);
+        }
+        console.log('Chache Miss::::::::Fetching blogs from database');
+
+        const categoryRecord = await sql`
+            SELECT * FROM categories WHERE id = ${categoryId}
+        `;
 
         let countResult;
         if(categoryId && categoryRecord && categoryRecord.length > 0) {
@@ -420,14 +457,20 @@ export const getBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 })
             } );
 
-            return res.status(200).json({
+            const responseData = {
                 success: true,
                 data: blogsWithAuthor,
                 pagination: {
                     page,
                     limit,
                 },
-            });
+            };
+
+            // 30 minutes (1800 seconds)
+            await RedisCache.set(cacheKey, responseData, 1800);
+            console.log('Blogs saved to cache::::::::');
+
+            return res.status(200).json(responseData);
         } else {
             return res.status(200).json({
                 success: true,
@@ -774,6 +817,18 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
             });
         }
 
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+
+        const cacheKey = `myblogs:user:${id}:page${page}:limit${limit}`;
+        const cachedMyBlogs = await RedisCache.get(cacheKey);
+        if (cachedMyBlogs) {
+            console.log('Cache Hit::::Returning my blogs from cache');
+            return res.status(200).json(cachedMyBlogs);
+        }
+        console.log('Cache Miss::::::::Fetching my blogs from database');
+
         const myBlogsCount = await sql`
             SELECT COUNT(*):: int as count
             FROM blogs 
@@ -785,10 +840,6 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 error: "Error finding blogs count",
             })
         }
-
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
-        const offset = (page - 1) * limit;
 
         const result = await sql`
             SELECT * FROM blogs 
@@ -875,14 +926,21 @@ export const myBlogs = async(req: AuthenticatedRequest, res: Response) => {
                 is_saved: savedMap.has(String(blog.id)), 
             });
         })
-        return res.status(200).json({
+
+        const responseData = {
             success: true,
             data: updatedResponse,
             pagination: {
                 page,
                 limit,
             },
-        });
+        };
+
+        // 25 minutes (1500 seconds)
+        await RedisCache.set(cacheKey, responseData, 1500);
+        console.log('My blogs saved to cache::::::::');
+
+        return res.status(200).json(responseData);
     } catch (error: any) {
         console.log(error);
         res.status(500).json({
@@ -901,16 +959,25 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
                 error: "Invalid id",
             });
         }
+
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+        const offset = (page - 1) * limit;
+        const cacheKey = `savedblogs:user:${id}:page${page}:limit${limit}`;
+        
+        const cachedSavedBlogs = await RedisCache.get(cacheKey);
+        if (cachedSavedBlogs) {
+            console.log('Cache Hit::::Returning saved blogs from cache');
+            return res.status(200).json(cachedSavedBlogs);
+        }
+        console.log('Cache Miss::::::::Fetching saved blogs from database');
+
         // get-my-saved-blogs
         const mysavedBlogs = await sql`
             SELECT * FROM savedblogs
             WHERE user_id = ${id}
         `;
         const savedBlogsIds = mysavedBlogs.map(v => parseInt(v.blog_id));
-        
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
-        const offset = (page - 1) * limit;
 
         const result = await sql`
             SELECT * FROM blogs 
@@ -999,14 +1066,20 @@ export const savedBlogs = async (req: AuthenticatedRequest, res: Response) => {
             })
         } );
 
-        return res.status(200).json({
+        const responseData = {
             success: true,
             data: updatedResult,
             pagination: {
                 page,
                 limit,
             },
-        });
+        };
+
+        // 25 minutes (1500 seconds)
+        await RedisCache.set(cacheKey, responseData, 1500);
+        console.log('Saved blogs saved to cache::::::::');
+
+        return res.status(200).json(responseData);
     } catch (error: any) {
         console.log(error);
         return res.status(500).json({
