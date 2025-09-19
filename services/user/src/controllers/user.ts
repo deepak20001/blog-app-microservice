@@ -10,6 +10,7 @@ import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
 import { sendEmail } from "../utils/send_email.js";
 import { RedisCache } from "../utils/cache.js";
+import { invalidateCacheJob } from "../utils/rabbitmq.js";
 
 // Validation schemas
 const registerSchema = z.object({
@@ -90,6 +91,10 @@ const resendVerificationOtpSchema = z.object({
 });
 
 // Controllers ::::::::::
+/* 
+REDIS-KEYS
+`user:${id}`
+*/
 export const register = async(req: Request, res: Response) => {
     try {
         const validationResult = registerSchema.safeParse(req.body);
@@ -498,6 +503,12 @@ export const updateAvatar = async(req: AuthenticatedRequest, res: Response) => {
             { avatar }
         );
 
+        // Invalidate user cache
+        const cacheKeysToInvalidate = [
+            `user:${payloadData._id}`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
+
         return res.status(200).json({
             success: true,
             message: "User avatar uploaded successfully",
@@ -538,6 +549,12 @@ export const updateUser = async(req: AuthenticatedRequest, res: Response) => {
             {  username, bio },
             { new: true },
         ).select("-password");
+
+        // Invalidate user cache
+        const cacheKeysToInvalidate = [
+            `user:${payloadData._id}`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         return res.status(200).json({
             success: true,

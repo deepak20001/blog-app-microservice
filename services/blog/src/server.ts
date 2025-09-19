@@ -4,11 +4,18 @@ import { sql } from "./utils/db.js";
 import blogRoutes from "./routes/blog.js";
 import commentRoutes from "./routes/comment.js"
 import { createClient } from "redis";
+import { connectRabbitMQ } from "./utils/rabbitmq.js";
+import { startCacheWorker } from "./workers/cache_worker.js";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
+
+connectRabbitMQ();
+startCacheWorker();
 
 async function initDB() {
     try{
@@ -94,6 +101,6 @@ app.use("/api/v1/comments", commentRoutes);
 initDB().then(() => {
     const port = process.env.PORT as string;
     app.listen(port, () => {
-        console.log(`Author service is listening on PORT: ${port}`);
+        console.log(`Blog service is listening on PORT: ${port}`);
     });
 });

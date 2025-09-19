@@ -5,12 +5,17 @@ import userRoutes from "./routes/user.js";
 import relationshipRoutes from "./routes/relationship.js"
 import cors from "cors";
 import { createClient } from "redis";
+import { startCacheWorker } from "./workers/cache_worker.js";
+import { connectRabbitMQ } from "./utils/rabbitmq.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+connectRabbitMQ();
+startCacheWorker();
 
 export const redisClient = createClient({
     url: process.env.REDIS_URL as string,
@@ -28,7 +33,7 @@ app.use("/api/v1/health", (req, res) => {
     res.send("User service running successfully");
 });
 app.use("/api/v1", userRoutes);
-app.use("/api/v1", relationshipRoutes);
+app.use("/api/v1", relationshipRoutes); 
 
 connectDB();
 

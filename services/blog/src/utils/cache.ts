@@ -26,4 +26,19 @@ export class RedisCache {
             console.log('Cache delete error:', error);
         }
     }
+
+    // Delete multiple keys matching a pattern
+    static async deletePattern(pattern: string) {
+        try {
+            const keys = await redisClient.keys(pattern);
+            if (keys.length > 0) {
+                await redisClient.del(keys);
+                console.log(`Deleted ${keys.length} keys matching pattern: ${pattern}`);
+            } else {
+                console.log(`No keys found for pattern: ${pattern}`);
+            }
+        } catch (error) {
+            console.log('Cache delete pattern error:', error);
+        }
+    }
 }

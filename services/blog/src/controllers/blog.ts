@@ -6,6 +6,7 @@ import axios from "axios";
 import { getTokenFromHeader } from "../utils/get_token.js";
 import { GoogleGenAI } from "@google/genai";
 import { RedisCache } from "../utils/cache.js";
+import { invalidateCacheJob } from "../utils/rabbitmq.js";
 
 // Validation schemas
 const createCategorySchema = z.object({
@@ -29,6 +30,15 @@ const createBlogSchema = z.object({
 });
 
 // Controllers ::::::::::
+/* 
+REDIS-KEYS
+`categories:all`
+`blog:${id}:user:${payloadData._id}`
+`blogs:page${page}:limit${limit}:cat${categoryId || 'all'}:search${search || 'none'}` 
+`myblogs:user:${id}:page${page}:limit${limit}`
+`savedblogs:user:${id}:page${page}:limit${limit}`
+*/
+
 export const createCategory = async(req: AuthenticatedRequest, res: Response) => {
     try {
         const validationResult = createCategorySchema.safeParse(req.body);
@@ -60,6 +70,12 @@ export const createCategory = async(req: AuthenticatedRequest, res: Response) =>
                 error: "Error creating category",
             });
         } 
+
+        // Invalidate categories cache
+        const cacheKeysToInvalidate = [
+            `categories:all`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         return res.status(201).json({
             sucess: true,
@@ -183,6 +199,13 @@ export const createBlog = async(req: AuthenticatedRequest, res: Response) => {
                 error: "Error creating blog",
             })
         }
+
+        // Invalidate blogs cache from all blogs and my-blogs
+        const cacheKeysToInvalidate = [
+            `blogs:*`, 
+            `myblogs:user:${authorId}:*`,
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         return res.status(201).json({
             success: true,
@@ -561,6 +584,15 @@ export const updateBlog = async(req: AuthenticatedRequest, res: Response) => {
             });
         }
 
+        // Invalidate cache for particular blog, all blogs, my-blogs, saved-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blodId}:*`,
+            `blogs:*`,
+            `myblogs:user:${authorId}:*`, 
+            `savedblogs:*`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
+
         return res.status(200).json({
             success: true,
             data: result,
@@ -606,6 +638,15 @@ export const deleteBlog = async(req: AuthenticatedRequest, res: Response) => {
         await sql`
             DELETE FROM blogs WHERE id = ${blodId} AND author_id = ${authorId}
         `;
+
+        // Invalidate cache for particular blog, all blogs, my-blogs, saved-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blodId}:*`,
+            `blogs:*`,
+            `myblogs:user:${authorId}:*`,
+            `savedblogs:*`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         res.status(200).json({
             success: true,
@@ -658,6 +699,15 @@ export const saveBlog = async(req: AuthenticatedRequest, res: Response) => {
             INSERT INTO savedblogs (blog_id, user_id) 
             VALUES (${blogId}, ${userId})
         `;
+
+        // Invalidate cache for particular blog, saved-blogs, all blogs, my-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blogId}:user:${userId}`, 
+            `savedblogs:user:${userId}:*`,
+            `blogs:*`,
+            `myblogs:user:${userId}:*`
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
         
         return res.status(201).json({
             success: true,
@@ -699,6 +749,15 @@ export const unsaveBlog = async(req: AuthenticatedRequest, res: Response) => {
         await sql`
             DELETE FROM savedblogs where blog_id = ${blogId} AND user_id = ${userId}
         `;
+
+        // Invalidate cache for particular blog, saved-blogs, all blogs, my-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blogId}:user:${userId}`, 
+            `savedblogs:user:${userId}:*`,
+            `blogs:*`,
+            `myblogs:user:${userId}:*`
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
         
         return res.status(200).json({
             success: true,
@@ -752,6 +811,15 @@ export const upvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
             VALUES (${blogId}, ${userId})
         `;
 
+        // Invalidate cache for particular blog, saved-blogs, all blogs, my-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blogId}:user:${userId}`, 
+            `savedblogs:user:${userId}:*`,
+            `blogs:*`,
+            `myblogs:user:${userId}:*`
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
+
         return res.status(201).json({
             success: true,
             message: "Blog upvoted successfully",
@@ -792,6 +860,15 @@ export const unupvoteBlog = async(req: AuthenticatedRequest, res: Response) => {
         await sql`
             DELETE FROM upvotes WHERE blog_id = ${blogId} AND user_id = ${userId}
         `;
+
+        // Invalidate cache for particular blog, saved-blogs, all blogs, my-blogs
+        const cacheKeysToInvalidate = [
+            `blog:${blogId}:user:${userId}`, 
+            `savedblogs:user:${userId}:*`,
+            `blogs:*`,
+            `myblogs:user:${userId}:*`
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         return res.status(200).json({
             success: true,

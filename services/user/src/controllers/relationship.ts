@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import type { AuthenticatedRequest } from "../middleware/isAuth.js";
 import { success } from "zod";
 import User from "../model/user.js";
+import { invalidateCacheJob } from "../utils/rabbitmq.js";
 
 // Controllers ::::::::::
 export const getFollowers = async(req: AuthenticatedRequest, res: Response) => {
@@ -154,6 +155,13 @@ export const followProfile = async(req: AuthenticatedRequest, res: Response) => 
             followingId: id,
         });
 
+        // Invalidate user cache
+        const cacheKeysToInvalidate = [
+            `user:${jwtData._id}`, 
+            `user:${id}`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
+
         return res.status(200).json({
             success: true,
             message: "User followed successfully",
@@ -208,6 +216,13 @@ export const unfollowProfile = async(req: AuthenticatedRequest, res: Response) =
             followerId: payloadData._id, 
             followingId: id
         });
+
+        // Invalidate user cache
+        const cacheKeysToInvalidate = [
+            `user:${payloadData._id}`, 
+            `user:${id}`, 
+        ];
+        await invalidateCacheJob(cacheKeysToInvalidate);
 
         return res.status(200).json({
             success: true,
