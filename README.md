@@ -162,28 +162,85 @@ blog-app/
 
 ### User Service
 
-- `POST /api/v1/users/register` - User registration
-- `POST /api/v1/users/login` - User login
-- `POST /api/v1/users/verify-email` - Email verification
-- `POST /api/v1/users/forgot-password` - Password reset request
-- `GET /api/v1/users/:id` - Get user profile
-- `PUT /api/v1/users` - Update user profile
-- `POST /api/v1/users/avatar` - Upload avatar
+#### Authentication & Registration
+
+- `POST /api/v1/users/register` - Register new user account
+- `POST /api/v1/users/login` - User login with email/password
+- `POST /api/v1/users/check-registration` - Check if email is already registered
+- `POST /api/v1/users/verify-email` - Verify email with OTP
+- `POST /api/v1/users/resend-verification-otp` - Resend email verification OTP
+
+#### Password Management
+
+- `POST /api/v1/users/forgot-password` - Request password reset
+- `POST /api/v1/users/verify-password-reset-otp` - Verify password reset OTP
+- `POST /api/v1/users/resend-password-reset-otp` - Resend password reset OTP
+- `POST /api/v1/users/reset-password` - Reset password with OTP
+- `PATCH /api/v1/users/change-password` - Change password (authenticated)
+
+#### User Profile Management
+
+- `GET /api/v1/users/:id` - Get user profile by ID
+- `PATCH /api/v1/users` - Update user profile
+- `PATCH /api/v1/users/avatar` - Update user avatar
+- `GET /api/v1/users/profile-stats/:id` - Get user profile statistics
+- `GET /api/v1/users` - Search users
+- `POST /api/v1/users/profiles` - Get multiple user profiles
+- `DELETE /api/v1/users` - Delete user account
+
+#### Social Features
+
+- `GET /api/v1/relationships/followers/:id` - Get user's followers
+- `GET /api/v1/relationships/followings/:id` - Get user's followings
+- `POST /api/v1/relationships/follow` - Follow a user
+- `POST /api/v1/relationships/unfollow` - Unfollow a user
 
 ### Blog Service
 
-- `GET /api/v1/blogs/filter` - Get blogs with filtering
-- `POST /api/v1/blogs` - Create blog post
-- `GET /api/v1/blogs/:id` - Get blog details
-- `POST /api/v1/blogs/:id/upvote` - Like blog
-- `POST /api/v1/blogs/:id/save` - Save blog
-- `GET /api/v1/blogs/categories` - Get categories
-- `POST /api/v1/blogs/categories` - Create category
+#### Blog Management
+
+- `POST /api/v1/blogs` - Create new blog post
+- `GET /api/v1/blogs/filter` - Get blogs with filtering, pagination, and search
+- `GET /api/v1/blogs/:id` - Get blog details by ID
+- `PATCH /api/v1/blogs/:id` - Update blog post
+- `DELETE /api/v1/blogs/:id` - Delete blog post
+- `GET /api/v1/blogs/my-blogs/:id` - Get user's own blogs
+- `GET /api/v1/blogs/saved-blogs/:id` - Get user's saved blogs
+- `GET /api/v1/blogs/user-blogs-count/:id` - Get user's blog count
+
+#### Blog Interactions
+
+- `POST /api/v1/blogs/upvote-blog` - Like/upvote a blog
+- `DELETE /api/v1/blogs/unupvote-blog` - Unlike/unupvote a blog
+- `POST /api/v1/blogs/save-blog` - Save blog for later
+- `DELETE /api/v1/blogs/unsave-blog` - Remove saved blog
+
+#### Categories
+
+- `POST /api/v1/blogs/category` - Create new category
+- `GET /api/v1/blogs/categories` - Get all categories
+
+#### AI Content Generation
+
+- `POST /api/v1/blogs/ai-title` - Generate AI-powered blog title
+- `POST /api/v1/blogs/ai-short-desc` - Generate AI short description
+- `POST /api/v1/blogs/ai-desc` - Generate AI full description
+
+#### Comments
+
+- `POST /api/v1/comments` - Create comment on blog
+- `GET /api/v1/comments/:id` - Get comments for blog
+- `POST /api/v1/comments/upvote` - Like/upvote a comment
+- `DELETE /api/v1/comments/unupvote` - Unlike/unupvote a comment
+- `DELETE /api/v1/comments` - Delete comment
 
 ### Media Service
 
-- `POST /api/v1/media/avatar-upload` - Upload user avatar
-- `POST /api/v1/media/blog-image` - Upload blog image
+#### File Upload
+
+- `GET /health` - Health check endpoint
+- `POST /api/v1/media/avatar-upload` - Upload user avatar (JPG, PNG, WebP, max 5MB)
+- `POST /api/v1/media/blog-image` - Upload blog image (JPG, PNG, WebP, max 5MB)
 
 ## Setup Instructions
 
